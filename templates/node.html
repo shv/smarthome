@@ -4,6 +4,8 @@
     <h1>Node {{ node_id }}</h1>
     <ul id='nodes'></ul>
     <ul id='values'></ul>
+    <div><input type="checkbox" id='lamp1' /><label for="lamp1">Lamp 1</label></div>
+    <div><input type="checkbox" id='lamp2' /><label for="lamp2">Lamp 2</label></div>
     <script>
         $.get("/api/nodes/{{ node_id }}",
             function (data, status) {

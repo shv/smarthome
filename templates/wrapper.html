@@ -3,17 +3,39 @@
     <head>
         <title>Smarthome</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script>
+            var ws;
+            $(document).ready(function () {
+                $.get("/token",
+                    function (data, status) {
+                        console.log(data);
+                        var token = data["token"];
+                        console.log("Data: " + data + "\nStatus: " + status + "\nToken: " + token);
+                        document.querySelector("#ws-id").textContent = token;
+                        ws = new WebSocket(`/ws?token=${token}`);
+                        // var ws = new WebSocket(`ws://localhost:8000/ws`);
+                        ws.onmessage = function (event) {
+                            var messages = document.getElementById('messages')
+                            var message = document.createElement('li')
+                            var content = document.createTextNode(event.data)
+                            message.appendChild(content)
+                            messages.appendChild(message)
+                        };
+                    }
+                );
+            });
+        </script>
     </head>
     <body>
         <a href="/">Main</a> | <a href="/nodes">Nodes</a>
         {% if session %}
-            <div>Current session: {{ session }}</div>
+            <div>Current session: {{ session }}. WS session: <span id="ws-id"></span></div>
             {% block content %}
             {% endblock %}
         {% else %}
             <a href="/login">Login</a><br>
         {% endif %}
-
+        <ul id='messages'></ul>
     </body>
 </html>
 {# https://jinja.palletsprojects.com/en/3.1.x/templates/ #}

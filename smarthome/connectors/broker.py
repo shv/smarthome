@@ -3,6 +3,7 @@ import redis.asyncio as aioredis
 import json
 from fastapi import WebSocket
 from smarthome.logger import logger
+from smarthome.settings import settings
 
 
 class RedisPubSubManager:
@@ -14,7 +15,7 @@ class RedisPubSubManager:
         port (int): Redis server port.
     """
 
-    def __init__(self, host='127.0.0.1', port=6379):
+    def __init__(self, host=settings.redis_host, port=settings.redis_port):
         logger.info("Initializing RedisPubSubManager with host: %s, port: %s", host, port)
         self.redis_host = host
         self.redis_port = port

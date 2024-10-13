@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     pg_dsn: str = "sqlite:///./test.db"
     # pg_dsn: PostgresDsn = 'postgres://user:pass@localhost:5432/foobar'
 
+    redis_host: str = "127.0.0.1"
+    redis_port: int = 6380
     # api_key: str = Field(alias='my_api_key')
     # redis_dsn: RedisDsn = Field(
     #     'redis://user:pass@localhost:6379/1',
