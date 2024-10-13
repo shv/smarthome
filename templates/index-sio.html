@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Client</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>WS</h1>
+    <script>
+        const socket = io("http://localhost:8000/ws", {
+            transports: ["websocket"],
+            upgrade: false
+        });
+
+        socket.on("connect", () => {
+            console.log("Connected to server");
+
+            setTimeout(() => {
+                console.log("Sending event 'my_event'");
+                socket.emit("my_event", { message: "Hello from client" });
+            }, 1000);
+            // Отправляем событие на сервер
+            // socket.emit("my_event", { message: "Hello from client" });
+        });
+
+        socket.on("connect_error", (err) => {
+            console.error("Connection error:", err);
+        });
+
+        socket.on("response", (data) => {
+            console.log("Received from server:", data);
+        });
+
+        socket.on("disconnect", () => {
+            console.log("Disconnected from server");
+        });
+    </script>
+</body>
+</html>

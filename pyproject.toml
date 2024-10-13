@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "smarthome"
+version = "0.1.0"
+description = "Smart Home backend"
+authors = ["Alexey Sharypov <alexey@sharypov.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
+pydantic-settings = "^2.3.3"
+sqlalchemy = "^2.0.30"
+
+redis = "^5.0.6"
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+mypy = "^1.10.0"
+pylint = "^3.2.3"
+faker = "^25.8.0"
+pylint-pydantic = "^0.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+#dev = "smarthome.main:app"
+help = "poetry run uvicorn smarthome.main:app --reload --port 8000"
+
+[tool.pylint]
+extension-pkg-whitelist = "pydantic"
+exclude-too-few-public-methods="pydantic.*"

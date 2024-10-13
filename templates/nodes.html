@@ -1,0 +1,27 @@
+{% extends "wrapper.html" %}
+
+{% block content %}
+<h1>Node list</h1>
+<ul id='nodes'></ul>
+<script>
+    $.get("/api/nodes",
+        function (data, status) {
+            console.log("Data: " + data + "\nStatus: " + status);
+            var nodes_el = document.getElementById('nodes')
+            data["nodes"].forEach(function (currentValue, index, arr) {
+                console.log(currentValue)
+                var node_el = document.createElement('li')
+                var a = document.createElement("a");
+                a.href = "/nodes/" + currentValue["id"]
+                var content = document.createTextNode(
+                    "ID: " + currentValue["id"] + ", url: " + currentValue["url"] + ", is_active: "
+                        + currentValue["is_active"]
+                )
+                a.appendChild(content)
+                node_el.appendChild(a)
+                nodes_el.appendChild(node_el)
+            }
+        );
+    });
+</script>
+{% endblock %}

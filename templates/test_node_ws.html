@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <h1>Node WebSocket</h1>
+        <h2>Node Token: <span id="ws-id"></span></h2>
+        <form action="">
+            <input type="text" id="token" autocomplete="off"/>
+            <input type="button" id="connect" value="Connect">
+        </form>
+
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off" value='{"humidity": 64.3, "temperature": 21.6}'/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul>
+        <script>
+            var ws;
+            $("#connect").click(function(){
+                var token = document.getElementById('token').value;
+                console.log("Token: " + token);
+                document.querySelector("#ws-id").textContent = token;
+                ws = new WebSocket(`/ws/nodes?token=${token}`);
+                ws.onmessage = function(event) {
+                    var messages = document.getElementById('messages')
+                    var message = document.createElement('li')
+                    var content = document.createTextNode(event.data)
+                    message.appendChild(content)
+                    messages.appendChild(message)
+                };
+            });
+            function sendMessage(event) {
+                var input = document.getElementById("messageText")
+                ws.send('{"request_id": "1", "action": "put_data", "data": ' + input.value + '}')
+                // input.value = ''
+                event.preventDefault()
+            }
+
+        </script>
+    </body>
+</html>

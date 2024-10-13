@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <h1>Login</h1>
+        {% if session %}
+        <div>Current session: {{ session }}</div>
+        {% endif %}
+        <form>
+            <input type="text" id="email" autocomplete="off" name="email"/>
+            <input type="password" id="password" autocomplete="off" name="password"/>
+            <input type="button" id="submit" value="Send"/>
+        </form>
+        <script type="application/javascript">
+            jQuery["postJSON"] = function( url, data, callback ) {
+                // shift arguments if data argument was omitted
+                if ( jQuery.isFunction( data ) ) {
+                    callback = data;
+                    data = undefined;
+                }
+
+                return jQuery.ajax({
+                    url: url,
+                    type: "POST",
+                    contentType:"application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(data),
+                    success: callback
+                });
+            };
+            $("#submit").click(function(){
+                var email = document.getElementById('email')
+                var password = document.getElementById('password')
+                console.log(email, password)
+              $.postJSON("/login",
+              {
+                email: email.value,
+                password: password.value
+              },
+              function(data, status){
+                alert("Data: " + data + "\nStatus: " + status);
+                window.location.href = "/";
+              });
+            });
+        </script>
+    </body>
+</html>
