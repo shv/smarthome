@@ -50,3 +50,5 @@ def upsert_node_current_values(db: Session, node_id: int, current_value: schemas
         db_value = models.NodeCurrentValue(node_id=node_id, name=current_value.name, value={"value": current_value.value})
         db.add(db_value)
     db.commit()
+    db.refresh(db_value)
+    return db_value

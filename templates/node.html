@@ -27,10 +27,17 @@
                 data["data"].forEach(function (currentValue, index, arr) {
                     console.log(currentValue)
                     var node_el = document.createElement('li')
-                    var content = document.createTextNode(
-                        "ID: " + currentValue["id"] + ", " + currentValue["name"] + ": " + currentValue["value"]
+                    var value_label_el = document.createElement('span')
+                    var value_label_content = document.createTextNode(
+                        "ID: " + currentValue["id"] + ", " + currentValue["name"] + ": "
                     )
-                    node_el.appendChild(content)
+                    value_label_el.appendChild(value_label_content)
+                    var value_value_el = document.createElement('span')
+                    var value_value_content = document.createTextNode(currentValue["value"])
+                    value_value_el.appendChild(value_value_content)
+                    value_value_el.id = "current-value-" + currentValue["id"]
+                    node_el.appendChild(value_label_el)
+                    node_el.appendChild(value_value_el)
                     nodes_el.appendChild(node_el)
                 });
             }

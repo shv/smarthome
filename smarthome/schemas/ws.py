@@ -10,6 +10,7 @@ class WSActions(str, Enum):
     connect = 'connect'  # Подключение клиента
     disconnect = 'disconnect'  # Отключение клиента
     put_data = 'put_data'  # Отправка данных
+    current_values = "updated_values"  # Текущие значения
 
 
 class WSMessage(BaseModel):

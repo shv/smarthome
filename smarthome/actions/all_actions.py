@@ -9,6 +9,8 @@ from smarthome.depends import get_db
 from smarthome.connectors.bus import Bus, get_bus
 from smarthome.logger import logger
 from smarthome.schemas.ws import WSMessage
+from smarthome.schemas.nodes import NodeCurrentValue, NodeCurrentValues
+
 
 
 class BaseAction(ABC):
@@ -41,11 +43,17 @@ class ActionPutDataFromNode(BaseAction):
         # Сюда пишем полный ответ ноды
         cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
 
+        current_values = []
         for key, value in data.items():
-            cruds.upsert_node_current_values(
+            current_value = cruds.upsert_node_current_values(
                 self.db, self.node.id,
                 schemas.NodeCurrentValueCreate(name=key, value=value),
             )
+            current_values.append(NodeCurrentValue(
+                id=current_value.id,
+                name=current_value.name,
+                value=current_value.value,
+            ).model_dump())
 
         logger.info("DATA from ESP32 #%s received", self.node.id)
 
@@ -54,8 +62,8 @@ class ActionPutDataFromNode(BaseAction):
         for user in users:
             ws_message = WSMessage(
                 request_id="1",
-                action="put_data",
-                data=data,
+                action="updated_values",
+                data={"current_values": current_values},
             )
             logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
             await self.bus.publish(user.bus_id, ws_message)
