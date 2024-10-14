@@ -2,6 +2,7 @@
 Browser endpoints ans ws
 https://fastapi.tiangolo.com/advanced/websockets/
 """
+import asyncio
 from typing import Annotated
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
@@ -57,10 +58,12 @@ async def websocket_user_endpoint(
                 continue
 
             if message is not None:
-                logger.info("Get data from websocket: %s", message)
+                logger.info("Get message from websocket: %s", message)
                 ws_message = WSMessage(**message)
-                logger.info("Get data from websocket: %s", ws_message)
+                logger.info("Get ws_message from websocket: %s", ws_message)
                 await action_resolver.process(user, ws_message)
+            else:
+                await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)

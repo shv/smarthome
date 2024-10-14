@@ -64,6 +64,8 @@ class Bus:
                     await subscriber.websocket.send_json(ws_message.model_dump(exclude_none=True))
                 except RuntimeError as ex:
                     logger.exception("Failed to send message to websocket: %s. Ex: %s", ws_message, ex)
+            else:
+                await asyncio.sleep(0.1)
 
     async def publish(self, bus_id: str, message: WSMessage) -> None:
         redis_message = message.model_dump_json(exclude_none=True)

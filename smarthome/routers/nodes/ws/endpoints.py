@@ -2,6 +2,7 @@
 Nodes ws
 https://fastapi.tiangolo.com/advanced/websockets/
 """
+import asyncio
 from typing import Annotated
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
@@ -57,6 +58,8 @@ async def websocket_node_endpoint(
                 ws_message = WSMessage(**message)
                 logger.info("Get data from websocket: %s", ws_message)
                 await action_resolver.process(node, ws_message)
+            else:
+                await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
