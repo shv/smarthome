@@ -53,6 +53,9 @@
                     lamp_input_el.dataset.id = currentValue["id"];
                     lamp_input_el.id = "lamp-" + currentValue["id"];
                     lamp_input_el.onchange = sendMessage;
+                    if (currentValue["value"]) {
+                        lamp_input_el.checked = true
+                    }
                     var lamp_label_el = document.createElement('label')
                     lamp_label_el.for = "lamp-" + currentValue["id"];
                     var lamp_label_text = document.createTextNode(
