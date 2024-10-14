@@ -85,12 +85,12 @@ class ActionLampChangedFromNode(BaseAction):
         cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
 
         current_values = []
-        lamp_id = data.get("id")
+        node_lamp_id = data.get("id")
         value = data.get("value")
-        db_lamp = self.db.query(models.NodeLamp).filter(models.NodeLamp.node_lamp_id == lamp_id).first()
+        db_lamp = self.db.query(models.NodeLamp).filter(models.NodeLamp.node_lamp_id == node_lamp_id).first()
         logger.info("Lamp from db: %s", db_lamp)
         if not db_lamp:
-            logger.warning("Lamp %s not found in db", lamp_id)
+            logger.warning("Lamp %s not found in db", node_lamp_id)
             return
 
         db_lamp.value = value
@@ -103,8 +103,8 @@ class ActionLampChangedFromNode(BaseAction):
         for user in users:
             ws_message = WSMessage(
                 request_id="1",
-                action="updated_values",
-                data={"current_values": current_values},
+                action="updated_lamp",
+                data={"id": db_lamp.id, "value": db_lamp.value},
             )
             logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
             await self.bus.publish(user.bus_id, ws_message)

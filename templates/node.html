@@ -59,11 +59,16 @@
                     var lamp_label_el = document.createElement('label')
                     lamp_label_el.for = "lamp-" + currentValue["id"];
                     var lamp_label_text = document.createTextNode(
-                        "Lamp: " + currentValue["id"] + ", " + currentValue["name"] + ", v: " + currentValue["value"]
+                        "Lamp: " + currentValue["id"] + ", " + currentValue["name"] + ", v: "
                     )
+                    var lamp_value_el = document.createElement('span')
+                    lamp_value_el.id = "lamp-value-" + currentValue["id"];
+                    var lamp_value_text = document.createTextNode(currentValue["value"])
+                    lamp_value_el.appendChild(lamp_value_text)
                     lamp_label_el.appendChild(lamp_label_text)
                     lamp_div_el.appendChild(lamp_input_el)
                     lamp_div_el.appendChild(lamp_label_el)
+                    lamp_div_el.appendChild(lamp_value_el)
                     lamps_el.appendChild(lamp_div_el)
                 });
             }

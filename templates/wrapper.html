@@ -25,17 +25,36 @@
                             console.log(event.data)
                             var event_data = JSON.parse(event.data)
                             console.log(event_data)
-                            if (event_data && event_data.data && event_data.data.current_values) {
-                                console.log(event_data.data.current_values)
-                                event_data.data.current_values.forEach(function (item, index, arr) {
-                                    console.log(item)
-                                    var current_value_element = document.getElementById('current-value-' + item["id"])
-                                    console.log(current_value_element)
-                                    if (current_value_element) {
+                            if (event_data && event_data.action && event_data.data) {
+                                if (event_data.action === "updated_values" && event_data.data.current_values) {
+                                    console.log(event_data.data.current_values)
+                                    event_data.data.current_values.forEach(function (item, index, arr) {
+                                        console.log(item)
+                                        var current_value_element = document.getElementById('current-value-' + item["id"])
+                                        console.log(current_value_element)
+                                        if (current_value_element) {
+                                            console.log("Update")
+                                            current_value_element.innerHTML = item["value"]
+                                        }
+                                    })
+                                }
+                                if (event_data.action == "updated_lamp" && event_data.data) {
+                                    console.log("Got updated_values");
+                                    console.log(event_data.data);
+                                    var lamp_input_element = document.getElementById('lamp-' + event_data.data["id"]);
+                                    if (lamp_input_element) {
+                                        console.log(lamp_input_element)
                                         console.log("Update")
-                                        current_value_element.innerHTML = item["value"]
+                                        lamp_input_element.checked = event_data.data["value"]?true:false;
                                     }
-                                })
+                                    var lamp_value_element = document.getElementById('lamp-value-' + event_data.data["id"]);
+                                    if (lamp_value_element) {
+                                        console.log("Update")
+                                        lamp_value_element.innerHTML = event_data.data["value"]
+                                    }
+
+
+                                }
                             }
                         };
                     }
