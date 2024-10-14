@@ -69,6 +69,48 @@ class ActionPutDataFromNode(BaseAction):
             await self.bus.publish(user.bus_id, ws_message)
 
 
+class ActionLampChangedFromNode(BaseAction):
+    """
+    Получение данных лампы от ноды.
+    Класс привязывается к ноде
+    """
+
+    async def process(self, data: dict):
+        """
+        Пока условно формат данных от ноды - json с параметрами в корне
+        """
+        logger.info("DATA from ESP32 #%s: %s", self.node.id, data)
+
+        # Сюда пишем полный ответ ноды
+        cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
+
+        current_values = []
+        lamp_id = data.get("id")
+        value = data.get("value")
+        db_lamp = self.db.query(models.NodeLamp).filter(models.NodeLamp.node_lamp_id == lamp_id).first()
+        logger.info("Lamp from db: %s", db_lamp)
+        if not db_lamp:
+            logger.warning("Lamp %s not found in db", lamp_id)
+            return
+
+        db_lamp.value = value
+        # self.db.add(db_lamp)
+        # self.db.commit()
+
+        users = self.node.users
+
+        # Заменить экшн и вообще проработать экшны
+        for user in users:
+            ws_message = WSMessage(
+                request_id="1",
+                action="updated_values",
+                data={"current_values": current_values},
+            )
+            logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
+            await self.bus.publish(user.bus_id, ws_message)
+
+
+
 class ActionSendLampsStateToNodes(BaseAction):
     """
     Управление лампой юзером на нодах.
@@ -131,6 +173,7 @@ class ActionResolver:
         # Маппер экшнов. По экшну из сообщения выбирает класс экшна
         action_map = {
             "put_data": ActionPutDataFromNode,
+            "lamp_changed": ActionLampChangedFromNode,
             "send_lamps_state_to_nodes": ActionSendLampsStateToNodes,
         }
 
