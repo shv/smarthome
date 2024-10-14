@@ -4,8 +4,7 @@
     <h1>Node {{ node_id }}</h1>
     <ul id='nodes'></ul>
     <ul id='values'></ul>
-    <div><input type="checkbox" id='lamp1' /><label for="lamp1">Lamp 1</label></div>
-    <div><input type="checkbox" id='lamp2' /><label for="lamp2">Lamp 2</label></div>
+    <div id="lamps"></div>
     <script>
         $.get("/api/nodes/{{ node_id }}",
             function (data, status) {
@@ -42,5 +41,40 @@
                 });
             }
         );
+        $.get("/api/nodes/{{ node_id }}/lamps",
+            function (data, status) {
+                console.log("Data: " + data + "\nStatus: " + status);
+                var lamps_el = document.getElementById('lamps')
+                data["data"].forEach(function (currentValue, index, arr) {
+                    console.log(currentValue)
+                    var lamp_div_el = document.createElement('div')
+                    var lamp_input_el = document.createElement('input')
+                    lamp_input_el.type = "checkbox";
+                    lamp_input_el.dataset.id = currentValue["id"];
+                    lamp_input_el.id = "lamp-" + currentValue["id"];
+                    lamp_input_el.onchange = sendMessage;
+                    var lamp_label_el = document.createElement('label')
+                    lamp_label_el.for = "lamp-" + currentValue["id"];
+                    var lamp_label_text = document.createTextNode(
+                        "Lamp: " + currentValue["id"] + ", " + currentValue["name"]
+                    )
+                    lamp_label_el.appendChild(lamp_label_text)
+                    lamp_div_el.appendChild(lamp_input_el)
+                    lamp_div_el.appendChild(lamp_label_el)
+                    lamps_el.appendChild(lamp_div_el)
+                });
+            }
+        );
+        function sendMessage(event) {
+            var obj = this;
+            console.log(obj)
+            ws.send(JSON.stringify({
+                "request_id": "1",
+                "action": "send_lamps_state_to_nodes",
+                "data": {"lamps": [{"id": obj.dataset.id, "value": obj.checked?1:0}]}
+            }))
+            event.preventDefault()
+        }
+
     </script>
 {% endblock %}

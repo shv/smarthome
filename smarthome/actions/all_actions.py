@@ -31,7 +31,7 @@ class BaseAction(ABC):
 class ActionPutDataFromNode(BaseAction):
     """
     Получение данных от ноды.
-    Класс привязывается к клиенту (ноде или пользователю)
+    Класс привязывается к ноде
     """
 
     async def process(self, data: dict):
@@ -69,6 +69,52 @@ class ActionPutDataFromNode(BaseAction):
             await self.bus.publish(user.bus_id, ws_message)
 
 
+class ActionSendLampsStateToNodes(BaseAction):
+    """
+    Управление лампой юзером на нодах.
+    Класс привязывается к пользователю
+    """
+
+    async def process(self, data: dict):
+        """
+        Получаем лампу и значение
+        {"lamps": [{"id": 1, "value": 0}]}
+        где id - это идентификатор лампы в базе
+
+        Отправляем в ноду по каждой лампе:
+        {"id": 1, "value": 0}
+        где id - это внутренний идентификатор лампы внутри ноды
+        """
+        logger.info("DATA from User #%s: %s", self.user.id, data)
+        for lamp in data["lamps"]:
+            db_lamp = self.db.query(models.NodeLamp).filter(models.NodeLamp.id == lamp["id"]).first()
+            logger.info("Lamp from db: %s", db_lamp)
+            if not db_lamp:
+                logger.warning("Lamp %s not found in db", lamp["id"])
+                continue
+
+            db_node = db_lamp.node
+            logger.info("Node for lamp %s: %s", db_lamp, db_node)
+            if self.user not in db_node.users:
+                logger.error("Lamp %s is not connected to user %s", db_lamp, self.user)
+                continue
+
+            ws_message = WSMessage(
+                request_id="1",
+                action="set_lamp_state",
+                data={"id": db_lamp.node_lamp_id, "value": lamp["value"]},
+            )
+            logger.info("ActionSendLampsStateToNodes from User %s to Node %s Message: %s",
+                        self.user.id, db_node.id, ws_message)
+            await self.bus.publish(db_node.bus_id, ws_message)
+
+        # Получить из базы каждую лампу
+        # Сверить, нода лампу принадлежит юзеру
+        # Если не принадлежит, то просто пропустить
+        # Отправить на ноду сообщение
+        # Нода должна будет ответить,а вот ответ уже записываем в базу и отправляем юзерам
+
+
 class ActionResolver:
     """ Singleton через Depends """
     def __init__(self, db: Session, bus: Bus):
@@ -85,6 +131,7 @@ class ActionResolver:
         # Маппер экшнов. По экшну из сообщения выбирает класс экшна
         action_map = {
             "put_data": ActionPutDataFromNode,
+            "send_lamps_state_to_nodes": ActionSendLampsStateToNodes,
         }
 
         action_class = action_map[ws_message.action]

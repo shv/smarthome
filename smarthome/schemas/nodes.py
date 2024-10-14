@@ -78,6 +78,26 @@ class NodeCurrentValues(BaseModel):
         from_attributes = True
 
 
+class NodeLamp(BaseModel):
+    """ Read node lamp schema """
+    id: int
+    name: str
+    value: int
+
+    class ConfigDict:
+        """ Config """
+        from_attributes = True
+
+
+class NodeLamps(BaseModel):
+    """ Read lamp list schema """
+    data: list[NodeLamp]
+
+    class ConfigDict:
+        """ Config """
+        from_attributes = True
+
+
 class NodeCurrentValueCreate(BaseModel):
     name: str
     value: Any

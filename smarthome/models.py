@@ -85,6 +85,7 @@ class Node(Base):
     states = relationship("NodeState", back_populates="node")
     current_values = relationship("NodeCurrentValue", back_populates="node")
     users = relationship('User', secondary=UserNode.__table__, backref='nodes.id')
+    lamps = relationship("NodeLamp", back_populates="node")
 
     def __repr__(self):
         return f"<{self.id}>"
@@ -120,9 +121,31 @@ class NodeCurrentValue(Base):
     value = Column(JSON)
     node_id = Column(Integer, ForeignKey("nodes.id"), index=True)
     node = relationship("Node", back_populates="current_values")
+
     __table_args__ = (
         UniqueConstraint('node_id', 'name'),
     )
 
     def __repr__(self):
-        return f"<{self.id}: {self.created} [{self.node_id}]. {self.name}: {self.data}>"
+        return f"<{self.id} [{self.node_id}] {self.name}: {self.value}>"
+
+
+class NodeLamp(Base):
+    """ Node lamps db model """
+    __tablename__ = "node_lamps"
+
+    id = Column(Integer, primary_key=True)
+    created = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    updated = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    name = Column(String, index=True)
+    value = Column(Integer)
+    node_id = Column(Integer, ForeignKey("nodes.id"), index=True)
+    node = relationship("Node", back_populates="lamps")
+    node_lamp_id = Column(Integer)
+
+    __table_args__ = (
+        UniqueConstraint('node_id', 'node_lamp_id'),
+    )
+
+    def __repr__(self):
+        return f"<{self.id} [{self.node_id}] {self.name}: {self.value}>"
