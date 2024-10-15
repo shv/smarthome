@@ -36,7 +36,7 @@ async def websocket_node_endpoint(
     При этом все, что с нодой происходит, получают все пользователи ноды.
     """
     await manager.connect(websocket)
-    await bus.subscribe(websocket, node.bus_id)
+    subscriber = await bus.subscribe(websocket, node.bus_id)
     ws_message = WSMessage(
         request_id="1",
         action="connect",
@@ -62,7 +62,9 @@ async def websocket_node_endpoint(
                 await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
+        # TODO перенести возможно в общий метод отписки
         manager.disconnect(websocket)
+        await subscriber.unsubscribe()
         ws_message = WSMessage(
             request_id="1",
             action="disconnect",

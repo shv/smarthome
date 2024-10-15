@@ -19,10 +19,14 @@ class BusSubscriber:
         """
         Отписывается от пабсаб и убивает таску, которая слушает пабсаб
         """
+        # TODO где-то в этом же районе нужно из WS менеджера убирать коннект
         logger.warning("Unsubscribe: %s", self.bus_id)
         await self.pubsub_subscriber.unsubscribe(self.bus_id)
         logger.warning("Killing  task: %s", self.task)
-        self.task.kill()
+        if not self.task.cancelled():
+            self.task.cancel()
+        else:
+            self.task = None
 
 
 class Bus:
@@ -72,12 +76,13 @@ class Bus:
 
         await self.pubsub_client.publish(bus_id, redis_message)
 
-    async def subscribe(self, websocket, bus_id: str) -> None:
+    async def subscribe(self, websocket, bus_id: str) -> BusSubscriber:
         pubsub_subscriber = await self.pubsub_client.subscribe(bus_id)
         subscriber = BusSubscriber(websocket, bus_id, pubsub_subscriber)
         task = asyncio.create_task(self.pubsub_data_reader(subscriber))
         subscriber.task = task
         logger.info("Pubsub for client %s connected with task: %s", bus_id, task)
+        return subscriber
 
 
 async def get_bus() -> Bus:

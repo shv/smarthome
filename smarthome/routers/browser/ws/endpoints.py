@@ -39,7 +39,7 @@ async def websocket_user_endpoint(
     """
     logger.info("Application stats: %s", websocket.application_state)
     await manager.connect(websocket)
-    await bus.subscribe(websocket, user.bus_id)
+    subscriber = await bus.subscribe(websocket, user.bus_id)
 
     ws_message = WSMessage(
         request_id="1",
@@ -66,11 +66,13 @@ async def websocket_user_endpoint(
                 await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
+        # TODO перенести возможно в общий метод отписки
         manager.disconnect(websocket)
+        await subscriber.unsubscribe()
         ws_message = WSMessage(
             request_id="1",
             action="disconnect",
             data={"message": f"User {user.id} disconnected"},
         )
         await manager.broadcast(ws_message.model_dump(exclude_none=True))
-        logger.info(f"User {user.id} disconnected")
+        logger.error(f"User {user.id} disconnected")

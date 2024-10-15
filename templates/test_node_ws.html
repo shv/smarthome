@@ -8,13 +8,13 @@
         <h1>Node WebSocket</h1>
         <h2>Node Token: <span id="ws-id"></span></h2>
         <form action="">
-            <input type="text" id="token" autocomplete="off"/>
+            <input type="text" id="token" autocomplete="off" value="test"/>
             <input type="button" id="connect" value="Connect">
         </form>
 
         <form action="" onsubmit="sendMessage(event)">
             <input type="text" id="messageText" autocomplete="off" value='{"humidity": 64.3, "temperature": 21.6}'/>
-            <input type="text" id="action" autocomplete="off" value='updated_values'/>
+            <input type="text" id="action" autocomplete="off" value='lamp_changed'/>
             <button>Send</button>
         </form>
         <ul id='messages'>
