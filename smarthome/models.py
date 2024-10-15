@@ -44,7 +44,7 @@ class UserNode(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
 
     __table_args__ = (
-        PrimaryKeyConstraint(node_id, user_id),
+        PrimaryKeyConstraint("node_id", "user_id"),
         {},
     )
 
@@ -62,7 +62,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     tokens = relationship("UserToken", back_populates="user")
-    nodes = relationship('Node', secondary=UserNode.__table__, backref='users.id')
+    # nodes = relationship('Node', secondary=UserNode.__table__, backref='users.id')
+    nodes = relationship('Node', secondary=UserNode.__table__, backref='users_id')
 
     def __repr__(self):
         return f"<{self.id}: {self.email}>"
@@ -84,7 +85,8 @@ class Node(Base):
 
     states = relationship("NodeState", back_populates="node")
     current_values = relationship("NodeCurrentValue", back_populates="node")
-    users = relationship('User', secondary=UserNode.__table__, backref='nodes.id')
+    # users = relationship('User', secondary=UserNode.__table__, backref='nodes.id')
+    users = relationship('User', secondary=UserNode.__table__, backref='nodes_id')
     lamps = relationship("NodeLamp", back_populates="node")
 
     def __repr__(self):
