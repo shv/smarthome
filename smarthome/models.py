@@ -62,6 +62,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     tokens = relationship("UserToken", back_populates="user")
+
+    # TODO с этим нужно разобраться, как связь правильно делается
     # nodes = relationship('Node', secondary=UserNode.__table__, backref='users.id')
     nodes = relationship('Node', secondary=UserNode.__table__, backref='users_id')
 
@@ -85,8 +87,11 @@ class Node(Base):
 
     states = relationship("NodeState", back_populates="node")
     current_values = relationship("NodeCurrentValue", back_populates="node")
+
+    # TODO с этим нужно разобраться, как связь правильно делается
     # users = relationship('User', secondary=UserNode.__table__, backref='nodes.id')
     users = relationship('User', secondary=UserNode.__table__, backref='nodes_id')
+
     lamps = relationship("NodeLamp", back_populates="node")
 
     def __repr__(self):
