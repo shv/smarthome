@@ -98,6 +98,26 @@ class NodeLamps(BaseModel):
         from_attributes = True
 
 
+class NodeSensor(BaseModel):
+    """ Read node sensor schema """
+    id: int
+    name: str
+    value: float
+
+    class ConfigDict:
+        """ Config """
+        from_attributes = True
+
+
+class NodeSensors(BaseModel):
+    """ Read sensor list schema """
+    data: list[NodeSensor]
+
+    class ConfigDict:
+        """ Config """
+        from_attributes = True
+
+
 class NodeCurrentValueCreate(BaseModel):
     name: str
     value: Any

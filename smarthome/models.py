@@ -2,7 +2,7 @@
 Models
 """
 import datetime
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, JSON, DateTime, UniqueConstraint, PrimaryKeyConstraint
+from sqlalchemy import Boolean, Column, Float, Integer, String, ForeignKey, JSON, DateTime, UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 
 from smarthome.connectors.database import Base
@@ -167,7 +167,7 @@ class NodeSensor(Base):
     created = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
     updated = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
     name = Column(String, index=True)
-    value = Column(Integer)
+    value = Column(Float)
     node_id = Column(Integer, ForeignKey("nodes.id"), index=True)
     node = relationship("Node", back_populates="sensors")
     node_sensor_id = Column(Integer)

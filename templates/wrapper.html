@@ -55,8 +55,15 @@
                                         console.log("Update")
                                         lamp_value_element.innerHTML = event_data.data["value"]
                                     }
-
-
+                                }
+                                if (event_data.action == "updated_sensor" && event_data.data) {
+                                    console.log("Got updated_sensor");
+                                    console.log(event_data.data);
+                                    var sensor_value_element = document.getElementById('sensor-value-' + event_data.data["id"]);
+                                    if (sensor_value_element) {
+                                        console.log("Sensor Update")
+                                        sensor_value_element.innerHTML = event_data.data["value"]
+                                    }
                                 }
                             }
                         };

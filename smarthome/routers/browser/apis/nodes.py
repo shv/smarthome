@@ -70,3 +70,21 @@ def get_node_lamps(
     db_lamps = db_node.lamps
 
     return dict(data=db_lamps)
+
+
+@router.get("/{node_id}/sensors", response_model=schemas.NodeSensors)
+def get_node_sensors(
+        node_id: int,
+        user: Annotated[models.User, Depends(get_current_user)],
+):
+    """ Get current values of node by id """
+    # TODO fix it
+    db_nodes = [item for item in user.nodes if item.id == node_id]
+    if not db_nodes:
+        raise HTTPException(status_code=404, detail="Node not found")
+
+    db_node = db_nodes[0]
+
+    db_sensors = db_node.sensors
+
+    return dict(data=db_sensors)

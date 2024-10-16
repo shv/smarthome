@@ -3,8 +3,12 @@
 {% block content %}
     <h1>Node {{ node_id }}</h1>
     <ul id='nodes'></ul>
-    <ul id='values'></ul>
+    <h2>Sensors</h2>
+    <div id="sensors"></div>
+    <h2>Lamps</h2>
     <div id="lamps"></div>
+    <h2>Values</h2>
+    <ul id='values'></ul>
     <script>
         $.get("/api/nodes/{{ node_id }}",
             function (data, status) {
@@ -70,6 +74,26 @@
                     lamp_div_el.appendChild(lamp_label_el)
                     lamp_div_el.appendChild(lamp_value_el)
                     lamps_el.appendChild(lamp_div_el)
+                });
+            }
+        );
+        $.get("/api/nodes/{{ node_id }}/sensors",
+            function (data, status) {
+                console.log("Data: " + data + "\nStatus: " + status);
+                var sensors_el = document.getElementById('sensors')
+                data["data"].forEach(function (currentValue, index, arr) {
+                    console.log(currentValue)
+                    var sensor_div_el = document.createElement('div')
+                    var sensor_div_text = document.createTextNode(
+                        "Sensor: " + currentValue["id"] + ", " + currentValue["name"] + ": "
+                    )
+                    var sensor_value_el = document.createElement('span')
+                    sensor_value_el.id = "sensor-value-" + currentValue["id"];
+                    var sensor_value_text = document.createTextNode(currentValue["value"])
+                    sensor_value_el.appendChild(sensor_value_text)
+                    sensor_div_el.appendChild(sensor_div_text)
+                    sensor_div_el.appendChild(sensor_value_el)
+                    sensors_el.appendChild(sensor_div_el)
                 });
             }
         );
