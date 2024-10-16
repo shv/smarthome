@@ -65,6 +65,15 @@
                                         sensor_value_element.innerHTML = event_data.data["value"]
                                     }
                                 }
+                                if (event_data.action == "updated_node" && event_data.data) {
+                                    console.log("Got updated_sensor");
+                                    console.log(event_data.data);
+                                    var node_value_element = document.getElementById('node-online-' + event_data.data["id"]);
+                                    if (node_value_element) {
+                                        console.log("Node Update")
+                                        node_value_element.innerHTML = event_data.data["is_online"]
+                                    }
+                                }
                             }
                         };
                     }

@@ -9,8 +9,7 @@
     <script>
         function sendMessage(event) {
             var input = document.getElementById("messageText")
-            ws.send(JSON.stringify({"request_id": "1", "action": "put_data", "data": {"input": input.value}}))
-            input.value = ''
+            ws.send(JSON.stringify(input.value))
             event.preventDefault()
         }
     </script>

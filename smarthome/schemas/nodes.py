@@ -8,6 +8,7 @@ from pydantic import BaseModel, field_validator
 class NodeBase(BaseModel):
     """ Base node schema """
     is_active: bool
+    is_online: bool
     url: str
 
 

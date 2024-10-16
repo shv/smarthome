@@ -83,6 +83,7 @@ class Node(Base):
     id = Column(Integer, primary_key=True)
     url = Column(String, unique=True, index=True)
     is_active = Column(Boolean, default=False)
+    is_online = Column(Boolean, default=False)
     tokens = relationship("NodeToken", back_populates="node")
 
     states = relationship("NodeState", back_populates="node")
@@ -178,3 +179,18 @@ class NodeSensor(Base):
 
     def __repr__(self):
         return f"<{self.id} [{self.node_id}] {self.name}: {self.value}>"
+
+
+"""
+INIT
+insert into users (email, hashed_password) values ('alexey@sharypov.ru', '123');
+insert into nodes (url, is_active, is_online) values ('http://192.168.0.103/api', true, false);
+insert into node_tokens (token, node_id) values ('test', 1);
+insert into user_nodes (user_id, node_id) values (1,1);
+insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 17', 1, 0, 17);
+insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 18', 1, 0, 18);
+insert into node_sensors (name, node_id, value, node_sensor_id) values ('Temperatura (116)', 1, 0, 116);
+insert into node_sensors (name, node_id, value, node_sensor_id) values ('Humidity (216)', 1, 0, 216);
+
+insert into users (email, hashed_password) values ('shvmedia@mail.ru', '123');
+"""

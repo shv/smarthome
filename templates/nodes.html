@@ -15,9 +15,14 @@
                 a.href = "/nodes/" + currentValue["id"]
                 var content = document.createTextNode(
                     "ID: " + currentValue["id"] + ", url: " + currentValue["url"] + ", is_active: "
-                        + currentValue["is_active"]
+                        + currentValue["is_active"] + ", online: "
                 )
+                var node_online_el = document.createElement('span')
+                var node_online_content = document.createTextNode(currentValue["is_online"])
+                node_online_el.appendChild(node_online_content)
+                node_online_el.id = "node-online-" + currentValue["id"]
                 a.appendChild(content)
+                a.appendChild(node_online_el)
                 node_el.appendChild(a)
                 nodes_el.appendChild(node_el)
             }
