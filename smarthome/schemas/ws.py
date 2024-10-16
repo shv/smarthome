@@ -15,6 +15,7 @@ class WSActions(str, Enum):
     set_lamp_state = "set_lamp_state"  # Установка состояния ламп в ноде
     lamp_changed = "lamp_changed"  # Получено новое состояния ламп от ноды
     updated_lamp = "updated_lamp"  # Сообщение юзеру об обновлении лампы
+    sensor_changed = "sensor_changed"  # Получено новое состояние значений сенсоров
 
 
 class WSMessage(BaseModel):

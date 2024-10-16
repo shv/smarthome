@@ -110,6 +110,23 @@ class ActionLampChangedFromNode(BaseAction):
             await self.bus.publish(user.bus_id, ws_message)
 
 
+class ActionSensorChangedFromNode(BaseAction):
+    """
+    Получение данных сенсора от ноды.
+    Класс привязывается к ноде
+    """
+
+    async def process(self, data: dict):
+        """
+        Пока условно формат данных от ноды - json с параметрами в корне
+        """
+        logger.info("DATA from ESP32 #%s: %s", self.node.id, data)
+
+        # Сюда пишем полный ответ ноды
+        cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
+
+        logger.info("ActionSensorChangedFromNode done")
+
 
 class ActionSendLampsStateToNodes(BaseAction):
     """
@@ -174,6 +191,7 @@ class ActionResolver:
         action_map = {
             "put_data": ActionPutDataFromNode,
             "lamp_changed": ActionLampChangedFromNode,
+            "sensor_changed": ActionSensorChangedFromNode,
             "send_lamps_state_to_nodes": ActionSendLampsStateToNodes,
         }
 
