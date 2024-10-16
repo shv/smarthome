@@ -46,7 +46,7 @@ class ActionPutDataFromNode(BaseAction):
         current_values = []
         for key, value in data.items():
             current_value = cruds.upsert_node_current_values(
-                self.db, self.node.id,
+                self.db, self.node,
                 schemas.NodeCurrentValueCreate(name=key, value=value),
             )
             current_values.append(NodeCurrentValue(
@@ -84,10 +84,12 @@ class ActionLampChangedFromNode(BaseAction):
         # Сюда пишем полный ответ ноды
         cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
 
-        current_values = []
         node_lamp_id = data.get("id")
         value = data.get("value")
-        db_lamp = self.db.query(models.NodeLamp).filter(models.NodeLamp.node_lamp_id == node_lamp_id).first()
+        db_lamp = self.db.query(models.NodeLamp).filter(
+            models.NodeLamp.node_lamp_id == node_lamp_id,
+            models.NodeLamp.node == self.node,
+        ).first()
         logger.info("Lamp from db: %s", db_lamp)
         if not db_lamp:
             logger.warning("Lamp %s not found in db", node_lamp_id)
@@ -127,6 +129,30 @@ class ActionSensorChangedFromNode(BaseAction):
 
         logger.info("ActionSensorChangedFromNode done")
 
+        node_sensor_id = data.get("id")
+        value = data.get("value")
+        db_sensor = self.db.query(models.NodeSensor).filter(
+            models.NodeSensor.node_sensor_id == node_sensor_id,
+            models.NodeSensor.node == self.node,
+        ).first()
+        logger.info("Sensor from db: %s", db_sensor)
+        if not db_sensor:
+            logger.warning("Sensor %s not found in db", node_sensor_id)
+            return
+
+        db_sensor.value = value
+
+        users = self.node.users
+
+        # Заменить экшн и вообще проработать экшны
+        for user in users:
+            ws_message = WSMessage(
+                request_id="1",
+                action="updated_sensor",
+                data={"id": db_sensor.id, "value": db_sensor.value},
+            )
+            logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
+            await self.bus.publish(user.bus_id, ws_message)
 
 class ActionSendLampsStateToNodes(BaseAction):
     """

@@ -93,6 +93,7 @@ class Node(Base):
     users = relationship('User', secondary=UserNode.__table__, backref='nodes_id')
 
     lamps = relationship("NodeLamp", back_populates="node")
+    sensors = relationship("NodeSensor", back_populates="node")
 
     def __repr__(self):
         return f"<{self.id}>"
@@ -152,6 +153,27 @@ class NodeLamp(Base):
 
     __table_args__ = (
         UniqueConstraint('node_id', 'node_lamp_id'),
+    )
+
+    def __repr__(self):
+        return f"<{self.id} [{self.node_id}] {self.name}: {self.value}>"
+
+
+class NodeSensor(Base):
+    """ Node sensor db model """
+    __tablename__ = "node_sensors"
+
+    id = Column(Integer, primary_key=True)
+    created = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    updated = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    name = Column(String, index=True)
+    value = Column(Integer)
+    node_id = Column(Integer, ForeignKey("nodes.id"), index=True)
+    node = relationship("Node", back_populates="sensors")
+    node_sensor_id = Column(Integer)
+
+    __table_args__ = (
+        UniqueConstraint('node_id', 'node_sensor_id'),
     )
 
     def __repr__(self):

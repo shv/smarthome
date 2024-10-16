@@ -16,6 +16,7 @@ class WSActions(str, Enum):
     lamp_changed = "lamp_changed"  # Получено новое состояния ламп от ноды
     updated_lamp = "updated_lamp"  # Сообщение юзеру об обновлении лампы
     sensor_changed = "sensor_changed"  # Получено новое состояние значений сенсоров
+    updated_sensor = "updated_sensor"  # Сообщение юзеру об обновлении сенсора
 
 
 class WSMessage(BaseModel):

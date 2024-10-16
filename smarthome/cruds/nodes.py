@@ -38,16 +38,16 @@ def get_node_current_values(db: Session, node_id: int, skip: int = 0, limit: int
     ).offset(skip).limit(limit).all()
 
 
-def upsert_node_current_values(db: Session, node_id: int, current_value: schemas.NodeCurrentValueCreate):
+def upsert_node_current_values(db: Session, node: models.Node, current_value: schemas.NodeCurrentValueCreate):
     """ Upsert node current_values list """
     db_value = db.query(models.NodeCurrentValue).filter(
-        models.NodeCurrentValue.node_id == node_id,
+        models.NodeCurrentValue.node == node,
         models.NodeCurrentValue.name == current_value.name
     ).first()
     if db_value:
         db_value.value = {"value": current_value.value}
     else:
-        db_value = models.NodeCurrentValue(node_id=node_id, name=current_value.name, value={"value": current_value.value})
+        db_value = models.NodeCurrentValue(node_id=node.id, name=current_value.name, value={"value": current_value.value})
         db.add(db_value)
     db.commit()
     db.refresh(db_value)
