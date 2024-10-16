@@ -15,12 +15,15 @@
                         ws = new WebSocket(`/ws?token=${token}`);
                         // var ws = new WebSocket(`ws://localhost:8000/ws`);
                         ws.onmessage = function (event) {
-                            var messages = document.getElementById('messages')
-                            var message = document.createElement('li')
-                            // var content = document.createTextNode(data)
-                            var content = document.createTextNode(event.data)
-                            message.appendChild(content)
-                            messages.appendChild(message)
+                            var show_messages_log_el = document.getElementById('show-messages-log')
+                            if (show_messages_log_el.checked) {
+                                var messages = document.getElementById('messages')
+                                var message = document.createElement('li')
+                                // var content = document.createTextNode(data)
+                                var content = document.createTextNode(event.data)
+                                message.appendChild(content)
+                                messages.appendChild(message)
+                            }
 
                             console.log(event.data)
                             var event_data = JSON.parse(event.data)
@@ -71,7 +74,11 @@
         {% else %}
             <a href="/login">Login</a><br>
         {% endif %}
-        <ul id='messages'></ul>
+        <div>
+            <h3>Messages log</h3>
+            <input type="checkbox" id="show-messages-log" checked="checked"/><label for="show-messages-log">Show messages log</label>
+            <ul id='messages'></ul>
+        </div>
     </body>
 </html>
 {# https://jinja.palletsprojects.com/en/3.1.x/templates/ #}
