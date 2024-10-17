@@ -1,22 +1,18 @@
 {% extends "wrapper.html" %}
 
 {% block content %}
-    <h1>Node {{ node_id }}</h1>
-    <ul id='nodes'></ul>
-    <h2>Sensors</h2>
-    <div id="sensors"></div>
-    <h2>Lamps</h2>
-    <div id="lamps"></div>
-    <h2>Values</h2>
-    <ul id='values'></ul>
+    <div id='node' style="font-weight: bold">Node {{ node_id }}. </div>
+    <h2 style="text-align: center">Lamps</h2>
+    <div id="lamps" style="font-size: 30pt;text-align: center"></div>
+    <h2 style="text-align: center">Sensors</h2>
+    <div id="sensors" style="text-align: center"></div>
     <script>
         $.get("/api/nodes/{{ node_id }}",
             function (data, status) {
                 console.log("Data: " + data + "\nStatus: " + status);
-                var nodes_el = document.getElementById('nodes')
-                var node_el = document.createElement('li')
+                var node_el = document.getElementById('node')
                 var content = document.createTextNode(
-                    "ID: " + data["id"] + ", url: " + data["url"] + ", is_active: " + data["is_active"] + ", online: "
+                    "ID: " + data["id"] + ", is_active: " + data["is_active"] + ", online: "
                 )
                 var node_online_el = document.createElement('span')
                 var node_online_content = document.createTextNode(data["is_online"])
@@ -24,32 +20,31 @@
                 node_online_el.id = "node-online-" + data["id"]
                 node_el.appendChild(content)
                 node_el.appendChild(node_online_el)
-                nodes_el.appendChild(node_el)
             }
         );
 
-        $.get("/api/nodes/{{ node_id }}/current-values",
-            function (data, status) {
-                console.log("Data: " + data + "\nStatus: " + status);
-                var nodes_el = document.getElementById('values')
-                data["data"].forEach(function (currentValue, index, arr) {
-                    console.log(currentValue)
-                    var node_el = document.createElement('li')
-                    var value_label_el = document.createElement('span')
-                    var value_label_content = document.createTextNode(
-                        "ID: " + currentValue["id"] + ", " + currentValue["name"] + ": "
-                    )
-                    value_label_el.appendChild(value_label_content)
-                    var value_value_el = document.createElement('span')
-                    var value_value_content = document.createTextNode(currentValue["value"])
-                    value_value_el.appendChild(value_value_content)
-                    value_value_el.id = "current-value-" + currentValue["id"]
-                    node_el.appendChild(value_label_el)
-                    node_el.appendChild(value_value_el)
-                    nodes_el.appendChild(node_el)
-                });
-            }
-        );
+        // $.get("/api/nodes/{{ node_id }}/current-values",
+        //     function (data, status) {
+        //         console.log("Data: " + data + "\nStatus: " + status);
+        //         var nodes_el = document.getElementById('values')
+        //         data["data"].forEach(function (currentValue, index, arr) {
+        //             console.log(currentValue)
+        //             var node_el = document.createElement('li')
+        //             var value_label_el = document.createElement('span')
+        //             var value_label_content = document.createTextNode(
+        //                 "ID: " + currentValue["id"] + ", " + currentValue["name"] + ": "
+        //             )
+        //             value_label_el.appendChild(value_label_content)
+        //             var value_value_el = document.createElement('span')
+        //             var value_value_content = document.createTextNode(currentValue["value"])
+        //             value_value_el.appendChild(value_value_content)
+        //             value_value_el.id = "current-value-" + currentValue["id"]
+        //             node_el.appendChild(value_label_el)
+        //             node_el.appendChild(value_value_el)
+        //             nodes_el.appendChild(node_el)
+        //         });
+        //     }
+        // );
         $.get("/api/nodes/{{ node_id }}/lamps",
             function (data, status) {
                 console.log("Data: " + data + "\nStatus: " + status);
@@ -57,8 +52,12 @@
                 data["data"].forEach(function (currentValue, index, arr) {
                     console.log(currentValue)
                     var lamp_div_el = document.createElement('div')
+                    lamp_div_el.style.margin = "30pt"
                     var lamp_input_el = document.createElement('input')
                     lamp_input_el.type = "checkbox";
+                    lamp_input_el.style.width = "20pt"
+                    lamp_input_el.style.height = "20pt"
+                    lamp_input_el.style.margin = "10pt"
                     lamp_input_el.dataset.id = currentValue["id"];
                     lamp_input_el.id = "lamp-" + currentValue["id"];
                     lamp_input_el.onchange = sendMessage;
@@ -66,9 +65,9 @@
                         lamp_input_el.checked = true
                     }
                     var lamp_label_el = document.createElement('label')
-                    lamp_label_el.for = "lamp-" + currentValue["id"];
+                    lamp_label_el.htmlFor = "lamp-" + currentValue["id"];
                     var lamp_label_text = document.createTextNode(
-                        "Lamp: " + currentValue["id"] + ", " + currentValue["name"] + ", v: "
+                        currentValue["id"] + ". " + currentValue["name"] + ", v: "
                     )
                     var lamp_value_el = document.createElement('span')
                     lamp_value_el.id = "lamp-value-" + currentValue["id"];
@@ -90,7 +89,7 @@
                     console.log(currentValue)
                     var sensor_div_el = document.createElement('div')
                     var sensor_div_text = document.createTextNode(
-                        "Sensor: " + currentValue["id"] + ", " + currentValue["name"] + ": "
+                        currentValue["id"] + ". " + currentValue["name"] + ": "
                     )
                     var sensor_value_el = document.createElement('span')
                     sensor_value_el.id = "sensor-value-" + currentValue["id"];

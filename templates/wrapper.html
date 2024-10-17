@@ -29,19 +29,19 @@
                             var event_data = JSON.parse(event.data)
                             console.log(event_data)
                             if (event_data && event_data.action && event_data.data) {
-                                if (event_data.action === "updated_values" && event_data.data.current_values) {
-                                    console.log(event_data.data.current_values)
-                                    event_data.data.current_values.forEach(function (item, index, arr) {
-                                        console.log(item)
-                                        var current_value_element = document.getElementById('current-value-' + item["id"])
-                                        console.log(current_value_element)
-                                        if (current_value_element) {
-                                            console.log("Update")
-                                            current_value_element.innerHTML = item["value"]
-                                        }
-                                    })
-                                }
-                                if (event_data.action == "updated_lamp" && event_data.data) {
+                                // if (event_data.action === "updated_values" && event_data.data.current_values) {
+                                //     console.log(event_data.data.current_values)
+                                //     event_data.data.current_values.forEach(function (item, index, arr) {
+                                //         console.log(item)
+                                //         var current_value_element = document.getElementById('current-value-' + item["id"])
+                                //         console.log(current_value_element)
+                                //         if (current_value_element) {
+                                //             console.log("Update")
+                                //             current_value_element.innerHTML = item["value"]
+                                //         }
+                                //     })
+                                // }
+                                if (event_data.action === "updated_lamp" && event_data.data) {
                                     console.log("Got updated_values");
                                     console.log(event_data.data);
                                     var lamp_input_element = document.getElementById('lamp-' + event_data.data["id"]);
@@ -56,7 +56,7 @@
                                         lamp_value_element.innerHTML = event_data.data["value"]
                                     }
                                 }
-                                if (event_data.action == "updated_sensor" && event_data.data) {
+                                if (event_data.action === "updated_sensor" && event_data.data) {
                                     console.log("Got updated_sensor");
                                     console.log(event_data.data);
                                     var sensor_value_element = document.getElementById('sensor-value-' + event_data.data["id"]);
@@ -65,7 +65,7 @@
                                         sensor_value_element.innerHTML = event_data.data["value"]
                                     }
                                 }
-                                if (event_data.action == "updated_node" && event_data.data) {
+                                if (event_data.action === "updated_node" && event_data.data) {
                                     console.log("Got updated_sensor");
                                     console.log(event_data.data);
                                     var node_value_element = document.getElementById('node-online-' + event_data.data["id"]);
@@ -82,17 +82,21 @@
         </script>
     </head>
     <body>
-        <a href="/">Main</a> | <a href="/nodes">Nodes</a>
+        <div>
+            <a href="/">Main</a> | <a href="/nodes">Nodes</a>
+        </div>
+        <div>
         {% if session %}
-            <div>Current session: {{ session }}. WS session: <span id="ws-id"></span></div>
             {% block content %}
             {% endblock %}
+            <div style="margin-top: 30pt">Current session: {{ session }}. WS session: <span id="ws-id"></span></div>
         {% else %}
             <a href="/login">Login</a><br>
         {% endif %}
+        </div>
         <div>
             <h3>Messages log</h3>
-            <input type="checkbox" id="show-messages-log" checked="checked"/><label for="show-messages-log">Show messages log</label>
+            <input type="checkbox" id="show-messages-log" /><label for="show-messages-log">Show messages log</label>
             <ul id='messages'></ul>
         </div>
     </body>
