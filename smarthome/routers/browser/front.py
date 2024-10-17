@@ -98,7 +98,14 @@ async def login_redirect(
         db_token = cruds.create_token(db=db, user_id=db_user.id, token=token)
         logger.info("Token %s generated: %s", token, db_token)
 
-    response.set_cookie(key="session", value=db_token.token)
+    response.set_cookie(
+        key="session",
+        value=db_token.token,
+        max_age=60 * 60 * 24 * 365,  # Кука будет действовать 7 дней
+        httponly=True,  # Доступно только через HTTP (невозможно получить через JavaScript)
+        # secure=True,  # Работает только через HTTPS (если ваш сайт использует HTTPS)
+        # samesite="lax"  # Политика SameSite для защиты от CSRF-атак
+    )
 
     return schemas.Status()
 
