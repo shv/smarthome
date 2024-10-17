@@ -97,7 +97,7 @@ class ActionLampChangedFromNode(BaseAction):
 
         db_lamp.value = value
         # self.db.add(db_lamp)
-        # self.db.commit()
+        self.db.commit()
 
         users = self.node.users
 
@@ -141,6 +141,7 @@ class ActionSensorChangedFromNode(BaseAction):
             return
 
         db_sensor.value = value
+        self.db.commit()
 
         users = self.node.users
 
@@ -153,6 +154,7 @@ class ActionSensorChangedFromNode(BaseAction):
             )
             logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
             await self.bus.publish(user.bus_id, ws_message)
+
 
 class ActionSendLampsStateToNodes(BaseAction):
     """
