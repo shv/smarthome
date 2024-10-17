@@ -66,7 +66,9 @@ class Bus:
                 logger.info(">>Application stats: %s", subscriber.websocket.application_state.value)
                 try:
                     await subscriber.websocket.send_json(ws_message.model_dump(exclude_none=True))
-                except RuntimeError as ex:
+                # except RuntimeError as ex:
+                #     logger.exception("Failed to send message to websocket: %s. Ex: %s", ws_message, ex)
+                except Exception as ex:
                     logger.exception("Failed to send message to websocket: %s. Ex: %s", ws_message, ex)
             else:
                 await asyncio.sleep(0.1)
