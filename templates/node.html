@@ -103,14 +103,32 @@
         );
         function sendMessage(event) {
             var obj = this;
-            console.log(obj)
+            console.log("Lamp obj: ", obj)
             ws.send(JSON.stringify({
                 "request_id": "1",
                 "action": "send_lamps_state_to_nodes",
                 "data": {"lamps": [{"id": obj.dataset.id, "value": obj.checked?1:0}]}
             }))
-            event.preventDefault()
+            event.preventDefault();
+            return false;
         }
-
+        function sendReset(event) {
+            if (confirm("Вы уверены?")) {
+                ws.send(JSON.stringify({
+                    "request_id": "1",
+                    "action": "restart_node",
+                    "data": {
+                        "id": {{ node_id }}
+                    }
+                }))
+            }
+            event.preventDefault();
+            return false;
+        }
     </script>
+    <div style="text-align: center; margin-top: 20px;">
+        <form action="" onsubmit="sendReset(event)">
+            <button>Restart</button>
+        </form>
+    </div>
 {% endblock %}
