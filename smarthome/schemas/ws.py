@@ -18,6 +18,8 @@ class WSActions(str, Enum):
     sensor_changed = "sensor_changed"  # Получено новое состояние значений сенсоров
     updated_sensor = "updated_sensor"  # Сообщение юзеру об обновлении сенсора
     updated_node = "updated_node"  # Сообщение юзеру об обновлении ноды
+    restart = "restart"  # Перезагрузка ноды
+    restart_node = "restart_node"  # Перезагрузка ноды, команда от клиента
 
 
 class WSMessage(BaseModel):

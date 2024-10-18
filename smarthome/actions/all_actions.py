@@ -202,6 +202,39 @@ class ActionSendLampsStateToNodes(BaseAction):
         # Нода должна будет ответить,а вот ответ уже записываем в базу и отправляем юзерам
 
 
+class ActionRestartNode(BaseAction):
+    """
+    Перезагрузка ноды
+    Класс привязывается к пользователю
+    """
+
+    async def process(self, data: dict):
+        """
+        Получаем лампу и значение
+        {"id": 1}
+        где id - это идентификатор ноды в базе
+
+        Отправляем в ноду action = restart без данных
+        """
+        logger.info("DATA from User #%s: %s", self.user.id, data)
+        db_node = self.db.query(models.Node).filter(models.Node.id == data["id"]).first()
+        logger.info("Node from db: %s", db_node)
+        if not db_node:
+            logger.warning("Node %s not found in db", data["id"])
+            return
+
+        if self.user not in db_node.users:
+            logger.error("Node %s is not connected to user %s", db_node, self.user)
+            return
+
+        ws_message = WSMessage(
+            request_id="1",
+            action="restart",
+        )
+        logger.info("ActionRestartNode from User %s to Node %s Message: %s", self.user.id, db_node.id, ws_message)
+        await self.bus.publish(db_node.bus_id, ws_message)
+
+
 class ActionResolver:
     """ Singleton через Depends """
     def __init__(self, db: Session, bus: Bus):
@@ -221,6 +254,7 @@ class ActionResolver:
             "lamp_changed": ActionLampChangedFromNode,
             "sensor_changed": ActionSensorChangedFromNode,
             "send_lamps_state_to_nodes": ActionSendLampsStateToNodes,
+            "restart_node": ActionRestartNode,
         }
 
         action_class = action_map[ws_message.action]

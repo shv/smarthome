@@ -9,7 +9,7 @@
     <script>
         function sendMessage(event) {
             var input = document.getElementById("messageText")
-            ws.send(JSON.stringify(input.value))
+            ws.send(input.value)
             event.preventDefault()
         }
     </script>

@@ -55,13 +55,24 @@ async def websocket_user_endpoint(
                 logger.info("Get data from websocket: %s", message)
             except RuntimeError as ex:
                 logger.exception("Wrong message from user %s: %s", user, ex)
+            #     await asyncio.sleep(0.5)
+            #     continue
+            # except Exception as ex:
+            #     logger.exception("Wrong message from user %s: %s", user, ex)
+            #     await asyncio.sleep(0.5)
                 continue
 
             if message is not None:
                 logger.info("Get message from websocket: %s", message)
+                # try:
                 ws_message = WSMessage(**message)
                 logger.info("Get ws_message from websocket: %s", ws_message)
                 await action_resolver.process(user, ws_message)
+                # except Exception:
+                #     logger.exception("Wrong message: %s", message)
+                #     await asyncio.sleep(0.1)
+                #     continue
+                #{"request_id": "1", "action": "restart_node", "data": {"id": 1}}
             else:
                 await asyncio.sleep(0.1)
 
