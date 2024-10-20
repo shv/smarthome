@@ -83,16 +83,20 @@ async def websocket_node_endpoint(
                 logger.info("Get data from websocket: %s", message)
                 ws_message = WSMessage(**message)
                 logger.info("Get data from websocket: %s", ws_message)
+                # Переводим ноду в онлайн - она прислала сообщение
+                if not node.is_online:
+                    node.is_online = True
+                    db.commit()
                 await action_resolver.process(node, ws_message)
             else:
                 await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
         # TODO перенести возможно в общий метод отписки
-        manager.disconnect(websocket)
-        await subscriber.unsubscribe()
         node.is_online = False
         db.commit()
+        manager.disconnect(websocket)
+        await subscriber.unsubscribe()
 
         for user in users:
             ws_message = WSMessage(
