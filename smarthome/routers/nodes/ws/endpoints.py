@@ -87,6 +87,7 @@ async def websocket_node_endpoint(
                 if not node.is_online:
                     node.is_online = True
                     db.commit()
+                    logger.error("Node %s was online and send message: %s", node, ws_message)
                 await action_resolver.process(node, ws_message)
             else:
                 await asyncio.sleep(0.1)
