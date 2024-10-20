@@ -25,5 +25,10 @@ class WSConnectionManager:
     async def broadcast(self, message: dict) -> None:
         """ Send messages to all connections """
         for connection in self.active_connections:
-            # logger.info("Broadcasting message to %s", connection.__dict__)
-            await connection.send_json(message)
+            logger.info("Broadcasting message %s", message)
+            try:
+                await connection.send_json(message)
+            except Exception as ex:
+                logger.exception("Problem with broadcast message %s: %s", message, ex)
+                # Вот это не уверен, что нужно делать
+                self.disconnect(connection)

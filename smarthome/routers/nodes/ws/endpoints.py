@@ -59,7 +59,11 @@ async def websocket_node_endpoint(
         action="connect",
         data={"message": f"Node #{node.id} connected"},
     )
-    await manager.broadcast(ws_message.model_dump(exclude_none=True))
+    try:
+        await manager.broadcast(ws_message.model_dump(exclude_none=True))
+    except Exception as ex:
+        # Тут тоже нужно гасить тех, кто не онлайн
+        logger.exception("Problem with broadcast from node %s: %s", node, ex)
 
     try:
         while True:
