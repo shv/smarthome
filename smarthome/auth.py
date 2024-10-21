@@ -1,5 +1,5 @@
 from typing import Annotated, Union
-from fastapi import Depends, WebSocketException, Cookie, status, Query
+from fastapi import Cookie, Depends, HTTPException, Query, Response, status, WebSocketException
 from sqlalchemy.orm import Session
 
 from smarthome import cruds, models
@@ -7,7 +7,11 @@ from smarthome.depends import get_db
 from smarthome.logger import logger
 
 
-async def get_current_user(
+class AuthError(Exception):
+    pass
+
+
+async def _get_current_user(
     session: Annotated[Union[str, None], Cookie()] = None,
     token: Annotated[Union[str, None], Query()] = None,
     db: Session = Depends(get_db),
@@ -17,7 +21,7 @@ async def get_current_user(
     logger.info("Session: %s, token: %s", session, token)
     if session is None and token is None:
         logger.warning("No user")
-        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+        raise AuthError("No user")
 
     token = token if token else session
 
@@ -28,10 +32,40 @@ async def get_current_user(
             return user
 
     logger.info("User not found")
-    raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+    raise AuthError("No user")
 
 
-async def get_current_node(
+async def get_current_user(
+    response: Response,
+    session: Annotated[Union[str, None], Cookie()] = None,
+    token: Annotated[Union[str, None], Query()] = None,
+    db: Session = Depends(get_db),
+) -> models.User:
+    try:
+        result = await _get_current_user(session, token, db)
+    except AuthError as ex:
+        exception_params = {}
+        if session:
+            response.delete_cookie("session")
+            exception_params["headers"] = {"set-cookie": response.headers["set-cookie"]}
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, **exception_params) from ex
+    return result
+
+
+async def get_current_user_for_ws(
+    session: Annotated[Union[str, None], Cookie()] = None,
+    token: Annotated[Union[str, None], Query()] = None,
+    db: Session = Depends(get_db),
+) -> models.User:
+    """ Для вебсокета """
+    try:
+        result = await _get_current_user(session, token, db)
+    except AuthError as ex:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION) from ex
+    return result
+
+
+async def get_current_node_for_ws(
     token: Annotated[Union[str, None], Query()] = None,
     db: Session = Depends(get_db),
 ) -> models.User:

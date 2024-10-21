@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
 from smarthome import models
-from smarthome.auth import get_current_node
+from smarthome.auth import get_current_node_for_ws
 from smarthome.actions.all_actions import ActionResolver, get_action_resolver
 from smarthome.connectors.ws import WSConnectionManager
 from smarthome.connectors.bus import Bus, get_bus
@@ -28,7 +28,7 @@ manager = WSConnectionManager()
 @router.websocket("/ws/nodes")
 async def websocket_node_endpoint(
         websocket: WebSocket,
-        node: Annotated[models.Node, Depends(get_current_node)],
+        node: Annotated[models.Node, Depends(get_current_node_for_ws)],
         bus: Annotated[Bus, Depends(get_bus)],
         action_resolver: Annotated[ActionResolver, Depends(get_action_resolver)],
         db: Annotated[Session, Depends(get_db)],

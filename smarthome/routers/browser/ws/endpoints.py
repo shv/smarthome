@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 
 from smarthome import models
 from smarthome.actions.all_actions import ActionResolver, get_action_resolver
-from smarthome.auth import get_current_user
+from smarthome.auth import get_current_user_for_ws
 from smarthome.connectors.ws import WSConnectionManager
 from smarthome.connectors.bus import Bus, get_bus
 from smarthome.logger import logger
@@ -26,7 +26,7 @@ manager = WSConnectionManager()
 @router.websocket("/ws")
 async def websocket_user_endpoint(
         websocket: WebSocket,
-        user: Annotated[models.User, Depends(get_current_user)],
+        user: Annotated[models.User, Depends(get_current_user_for_ws)],
         bus: Annotated[Bus, Depends(get_bus)],
         action_resolver: Annotated[ActionResolver, Depends(get_action_resolver)],
 ):
