@@ -54,16 +54,16 @@ async def websocket_node_endpoint(
         await bus.publish(user.bus_id, ws_message)
 
     # Вот это почему-то себе отправляет сообщение
-    ws_message = WSMessage(
-        request_id="1",
-        action="connect",
-        data={"message": f"Node #{node.id} connected"},
-    )
-    try:
-        await manager.broadcast(ws_message.model_dump(exclude_none=True))
-    except Exception as ex:
-        # Тут тоже нужно гасить тех, кто не онлайн
-        logger.exception("Problem with broadcast from node %s: %s", node, ex)
+    # ws_message = WSMessage(
+    #     request_id="1",
+    #     action="connect",
+    #     data={"message": f"Node #{node.id} connected"},
+    # )
+    # try:
+    #     await manager.broadcast(ws_message.model_dump(exclude_none=True))
+    # except Exception as ex:
+    #     # Тут тоже нужно гасить тех, кто не онлайн
+    #     logger.exception("Problem with broadcast from node %s: %s", node, ex)
 
     try:
         while True:

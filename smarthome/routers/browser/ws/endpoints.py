@@ -41,12 +41,12 @@ async def websocket_user_endpoint(
     await manager.connect(websocket)
     subscriber = await bus.subscribe(websocket, user.bus_id)
 
-    ws_message = WSMessage(
-        request_id="1",
-        action="connect",
-        data={"message": f"User #{user.id} connected"},
-    )
-    await manager.broadcast(ws_message.model_dump(exclude_none=True))
+    # ws_message = WSMessage(
+    #     request_id="1",
+    #     action="connect",
+    #     data={"message": f"User #{user.id} connected"},
+    # )
+    # await manager.broadcast(ws_message.model_dump(exclude_none=True))
 
     try:
         while True:
