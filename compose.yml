@@ -27,7 +27,7 @@ services:
       - SMARTHOME_BAK_LOG_LEVEL=DEBUG
       - SMARTHOME_BAK_PG_DSN=sqlite:////code/prod.db
       - SMARTHOME_BAK_REDIS_HOST=redis
-      - SMARTHOME_BAK_REDIS_PORT=6381
+      - SMARTHOME_BAK_REDIS_PORT=6379
 #      - POSTGRES_USER=postgres
 #      - POSTGRES_PASSWORD=postgres
 #    ports:
@@ -40,7 +40,7 @@ services:
     image: redis:latest
     restart: always
     ports:
-      - "6381:6381"
+      - "6381:6379"
     expose:
       - 6381
 #    volumes:
@@ -48,7 +48,7 @@ services:
 #      - /compose/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
 #      - REDIS_PASSWORD=my-password
-      - REDIS_PORT=6381
+      - REDIS_PORT=6379
       - REDIS_DATABASES=16
     networks:
       - my_net
