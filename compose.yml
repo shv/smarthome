@@ -24,7 +24,7 @@ services:
 #    restart: on-failure
     environment:
       - SMARTHOME_BAK_LOG_LEVEL=ERROR
-      - SMARTHOME_BAK_PG_DSN=sqlite:////./prod.db
+      - SMARTHOME_BAK_PG_DSN=sqlite:////code/prod.db
 #      - POSTGRES_USER=postgres
 #      - POSTGRES_PASSWORD=postgres
 #    ports:
