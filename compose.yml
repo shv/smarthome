@@ -26,6 +26,7 @@ services:
     environment:
       - SMARTHOME_BAK_LOG_LEVEL=DEBUG
       - SMARTHOME_BAK_PG_DSN=sqlite:////code/prod.db
+      - SMARTHOME_BAK_REDIS_HOST=redis
       - SMARTHOME_BAK_REDIS_PORT=6381
 #      - POSTGRES_USER=postgres
 #      - POSTGRES_PASSWORD=postgres
