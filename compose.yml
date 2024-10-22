@@ -24,7 +24,7 @@ services:
 #    container_name: db_postgres
 #    restart: on-failure
     environment:
-      - SMARTHOME_BAK_LOG_LEVEL=ERROR
+      - SMARTHOME_BAK_LOG_LEVEL=DEBUG
       - SMARTHOME_BAK_PG_DSN=sqlite:////code/prod.db
       - SMARTHOME_BAK_REDIS_PORT=6381
 #      - POSTGRES_USER=postgres
