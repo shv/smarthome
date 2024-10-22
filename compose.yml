@@ -10,7 +10,8 @@ services:
     depends_on:
       - redis
     ports:
-      - "8888:8000"
+      - "0.0.0.0:8888:8000"
+#      - "127.0.0.1:8888:8000"
 #    env_file:
 #      - .env
     volumes:
