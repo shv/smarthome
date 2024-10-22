@@ -1,9 +1,5 @@
 version: '3.3'
 
-networks:
-  my-net:
-    external: true
-
 services:
   fastapi_service:
     build:
@@ -21,7 +17,7 @@ services:
     volumes:
       - ./:/home/app
 #    networks:
-#      - my-net
+#      - my_net
 #  db_postgres:
 #    image: postgres:14.3-alpine
 #    hostname: db_postgres
@@ -39,7 +35,7 @@ services:
 #    volumes:
 #      - db-postgres:/var/lib/postgresql/data
     networks:
-      - my-net
+      - my_net
   redis:
     image: redis:latest
     restart: always
@@ -55,7 +51,7 @@ services:
       - REDIS_PORT=6381
       - REDIS_DATABASES=16
     networks:
-      - my-net
+      - my_net
 
   redis-debug:
     image: redis:latest
@@ -72,4 +68,10 @@ services:
       - REDIS_PORT=6380
       - REDIS_DATABASES=16
 #    networks:
-#      - my-net
+#      - my_net
+
+networks:
+  my_net:
+    driver: bridge
+#    external: true
+
