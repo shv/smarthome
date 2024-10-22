@@ -13,5 +13,5 @@ COPY . /code
 RUN poetry config virtualenvs.create true \
     && poetry install --no-interaction --no-ansi
 
-CMD ["poetry", "run", "uvicorn", "smarthome.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "smarthome.main:app", "--host", "0.0.0.0", "--port", "8000", "--ws-ping-interval", "10", "--ws-ping-timeout", "10"]
 #CMD ["poetry", "run", "pytest"]
