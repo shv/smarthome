@@ -1,5 +1,9 @@
 version: '3.3'
 
+networks:
+  my-net:
+    external: true
+
 services:
   fastapi_service:
     build:
@@ -69,7 +73,3 @@ services:
       - REDIS_DATABASES=16
 #    networks:
 #      - my-net
-
-networks:
-  my-net:
-    external: true
