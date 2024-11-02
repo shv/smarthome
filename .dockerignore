@@ -1,1 +1,33 @@
-.venv
+## folders
+.venv/
+.env/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.vscode/
+.git/
+.idea/
+
+# project specific
+logs/
+
+## files
+.gitignore
+*.pyc
+*.log
+*.log.zip
+*.log.*
+.python-version
+.pre-commit-config.yaml
+.pre-commit-config.yaml.template
+.DS_Store
+
+# dotenv
+.env
+
+# No need in image
+Dockerfile
+.dockerignore
+
+# Sqlite
+*.db

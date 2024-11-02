@@ -1,23 +1,47 @@
-version: '3.3'
-
 services:
-  fastapi_service:
+  prod:
+    profiles:
+      - prod
     build:
       context: ./
       dockerfile: Dockerfile
-    hostname: fastapi_service
-    container_name: fastapi_service
+      args:
+        POETRY_DEV_INSTALL: "false"
     depends_on:
-      - redis
+      - redis-prod
     ports:
       - "0.0.0.0:8888:8000"
-#      - "127.0.0.1:8888:8000"
-#    env_file:
-#      - .env
     volumes:
-      - ./:/home/app
-#    networks:
-#      - my_net
+      - /Users/sharypoff/code/own/iot/production/production_db:/code/_production_db
+#  db_postgres:
+#    image: postgres:14.3-alpine
+#    hostname: db_postgres
+#    container_name: db_postgres
+#    restart: on-failure
+    environment:
+      - SMARTHOME_BAK_LOG_LEVEL=INFO
+      - SMARTHOME_BAK_PG_DSN=sqlite:////code/_production_db/prod.db
+      - SMARTHOME_BAK_REDIS_HOST=redis-prod
+      - SMARTHOME_BAK_REDIS_PORT=6379
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=postgres
+    networks:
+      - prod_net
+
+  dev:
+    profiles:
+      - dev
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        POETRY_DEV_INSTALL: "true"
+    depends_on:
+      - redis-dev
+    ports:
+      - "0.0.0.0:8088:8000"
+    volumes:
+      - ./:/code
 #  db_postgres:
 #    image: postgres:14.3-alpine
 #    hostname: db_postgres
@@ -25,53 +49,48 @@ services:
 #    restart: on-failure
     environment:
       - SMARTHOME_BAK_LOG_LEVEL=DEBUG
-      - SMARTHOME_BAK_PG_DSN=sqlite:////code/prod.db
-      - SMARTHOME_BAK_REDIS_HOST=redis
+      - SMARTHOME_BAK_PG_DSN=sqlite:////code/_local_db/debug.db
+      - SMARTHOME_BAK_REDIS_HOST=redis-dev
       - SMARTHOME_BAK_REDIS_PORT=6379
 #      - POSTGRES_USER=postgres
 #      - POSTGRES_PASSWORD=postgres
-#    ports:
-#      - "5434:5432"
-#    volumes:
-#      - db-postgres:/var/lib/postgresql/data
     networks:
-      - my_net
-  redis:
+      - dev_net
+
+  redis-prod:
+    profiles:
+      - prod
     image: redis:latest
     restart: always
     ports:
       - "6381:6379"
     expose:
       - 6381
-#    volumes:
-#      - /path/to/local/dаta:/root/redis
-#      - /compose/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
 #      - REDIS_PASSWORD=my-password
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
     networks:
-      - my_net
+      - prod_net
 
-  redis-debug:
+  redis-dev:
     image: redis:latest
     restart: always
     ports:
       - "6380:6379"
     expose:
       - 6380
-#    volumes:
-#      - /path/to/local/dаta:/root/redis
-#      - /compose/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
 #      - REDIS_PASSWORD=my-password
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
-#    networks:
-#      - my_net
+    networks:
+      - dev_net
 
 networks:
-  my_net:
+  prod_net:
+    driver: bridge
+  dev_net:
     driver: bridge
 #    external: true
 
