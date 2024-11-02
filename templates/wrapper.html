@@ -55,6 +55,12 @@
                                         console.log("Update")
                                         lamp_value_element.innerHTML = event_data.data["value"]
                                     }
+                                    var lamp_updated_element = document.getElementById('lamp-updated-' + event_data.data["id"]);
+                                    if (lamp_updated_element) {
+                                        var lamp_updated = new Date(Date.parse(event_data.data["updated"] + "Z"));
+                                        console.log("Update")
+                                        lamp_updated_element.innerHTML = lamp_updated.toLocaleString("ru-RU");
+                                    }
                                 }
                                 if (event_data.action === "updated_sensor" && event_data.data) {
                                     console.log("Got updated_sensor");
@@ -63,6 +69,12 @@
                                     if (sensor_value_element) {
                                         console.log("Sensor Update")
                                         sensor_value_element.innerHTML = event_data.data["value"]
+                                    }
+                                    var sensor_updated_element = document.getElementById('sensor-updated-' + event_data.data["id"]);
+                                    if (sensor_updated_element) {
+                                        var sensor_updated = new Date(Date.parse(event_data.data["updated"] + "Z"));
+                                        console.log("Update")
+                                        sensor_updated_element.innerHTML = sensor_updated.toLocaleString("ru-RU");
                                     }
                                 }
                                 if (event_data.action === "updated_node" && event_data.data) {

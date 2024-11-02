@@ -57,7 +57,7 @@ services:
     image: redis:latest
     restart: always
     ports:
-      - "6380:6380"
+      - "6380:6379"
     expose:
       - 6380
 #    volumes:
@@ -65,7 +65,7 @@ services:
 #      - /compose/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
 #      - REDIS_PASSWORD=my-password
-      - REDIS_PORT=6380
+      - REDIS_PORT=6379
       - REDIS_DATABASES=16
 #    networks:
 #      - my_net

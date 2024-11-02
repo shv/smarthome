@@ -1,5 +1,6 @@
 from typing import Annotated
 
+import datetime
 from abc import ABC, abstractmethod
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -96,7 +97,7 @@ class ActionLampChangedFromNode(BaseAction):
             return
 
         db_lamp.value = value
-        # self.db.add(db_lamp)
+        db_lamp.updated = datetime.datetime.now(datetime.timezone.utc)
         self.db.commit()
 
         users = self.node.users
@@ -106,7 +107,7 @@ class ActionLampChangedFromNode(BaseAction):
             ws_message = WSMessage(
                 request_id="1",
                 action="updated_lamp",
-                data={"id": db_lamp.id, "value": db_lamp.value},
+                data={"id": db_lamp.id, "value": db_lamp.value, "updated": db_lamp.updated},
             )
             logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
             await self.bus.publish(user.bus_id, ws_message)
@@ -141,6 +142,7 @@ class ActionSensorChangedFromNode(BaseAction):
             return
 
         db_sensor.value = value
+        db_sensor.updated = datetime.datetime.now(datetime.timezone.utc)
         self.db.commit()
 
         users = self.node.users
@@ -150,7 +152,7 @@ class ActionSensorChangedFromNode(BaseAction):
             ws_message = WSMessage(
                 request_id="1",
                 action="updated_sensor",
-                data={"id": db_sensor.id, "value": db_sensor.value},
+                data={"id": db_sensor.id, "value": db_sensor.value, "updated": db_sensor.updated},
             )
             logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
             await self.bus.publish(user.bus_id, ws_message)

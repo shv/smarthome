@@ -3,6 +3,7 @@ Node schemas
 """
 from typing import Any
 from pydantic import BaseModel, field_validator
+from datetime import datetime
 
 
 class NodeBase(BaseModel):
@@ -84,6 +85,7 @@ class NodeLamp(BaseModel):
     id: int
     name: str
     value: int
+    updated: datetime | None
 
     class ConfigDict:
         """ Config """
@@ -104,6 +106,7 @@ class NodeSensor(BaseModel):
     id: int
     name: str
     value: float
+    updated: datetime | None
 
     class ConfigDict:
         """ Config """
