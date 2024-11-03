@@ -1,17 +1,13 @@
-from typing import Annotated
-
 import datetime
 from abc import ABC, abstractmethod
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from smarthome import cruds, models, schemas
+from smarthome import models
 from smarthome.depends import get_db
 from smarthome.connectors.bus import Bus, get_bus
 from smarthome.logger import logger
 from smarthome.schemas.ws import WSMessage
-from smarthome.schemas.nodes import NodeCurrentValue, NodeCurrentValues
-
 
 
 class BaseAction(ABC):
@@ -29,47 +25,6 @@ class BaseAction(ABC):
         """ Нужно переопределить в каждом наследнике """
 
 
-class ActionPutDataFromNode(BaseAction):
-    """
-    Получение данных от ноды.
-    Класс привязывается к ноде
-    """
-
-    async def process(self, data: dict):
-        """
-        Пока условно формат данных от ноды - json с параметрами в корне
-        """
-        logger.info("DATA from ESP32 #%s: %s", self.node.id, data)
-
-        # Сюда пишем полный ответ ноды
-        cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
-
-        current_values = []
-        for key, value in data.items():
-            current_value = cruds.upsert_node_current_values(
-                self.db, self.node,
-                schemas.NodeCurrentValueCreate(name=key, value=value),
-            )
-            current_values.append(NodeCurrentValue(
-                id=current_value.id,
-                name=current_value.name,
-                value=current_value.value,
-            ).model_dump())
-
-        logger.info("DATA from ESP32 #%s received", self.node.id)
-
-        users = self.node.users
-
-        for user in users:
-            ws_message = WSMessage(
-                request_id="1",
-                action="updated_values",
-                data={"current_values": current_values},
-            )
-            logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
-            await self.bus.publish(user.bus_id, ws_message)
-
-
 class ActionLampChangedFromNode(BaseAction):
     """
     Получение данных лампы от ноды.
@@ -81,9 +36,6 @@ class ActionLampChangedFromNode(BaseAction):
         Пока условно формат данных от ноды - json с параметрами в корне
         """
         logger.info("DATA from ESP32 #%s: %s", self.node.id, data)
-
-        # Сюда пишем полный ответ ноды
-        cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
 
         node_lamp_id = data.get("id")
         value = data.get("value")
@@ -124,9 +76,6 @@ class ActionSensorChangedFromNode(BaseAction):
         Пока условно формат данных от ноды - json с параметрами в корне
         """
         logger.info("DATA from ESP32 #%s: %s", self.node.id, data)
-
-        # Сюда пишем полный ответ ноды
-        cruds.create_node_state(self.db, schemas.NodeStateCreate(data=data, node_id=self.node.id))
 
         logger.info("ActionSensorChangedFromNode done")
 
@@ -252,7 +201,6 @@ class ActionResolver:
         """
         # Маппер экшнов. По экшну из сообщения выбирает класс экшна
         action_map = {
-            "put_data": ActionPutDataFromNode,
             "lamp_changed": ActionLampChangedFromNode,
             "sensor_changed": ActionSensorChangedFromNode,
             "send_lamps_state_to_nodes": ActionSendLampsStateToNodes,

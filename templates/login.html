@@ -35,7 +35,7 @@
                 var email = document.getElementById('email')
                 var password = document.getElementById('password')
                 console.log(email, password)
-              $.postJSON("/login",
+              $.postJSON("/api/auth/login",
               {
                 email: email.value,
                 password: password.value

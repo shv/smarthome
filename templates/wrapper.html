@@ -6,7 +6,7 @@
         <script>
             var ws;
             $(document).ready(function () {
-                $.get("/token",
+                $.get("/api/auth/token",
                     function (data, status) {
                         console.log(data);
                         var token = data["token"];

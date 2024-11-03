@@ -36,24 +36,6 @@ def get_node(
     return db_nodes[0]
 
 
-@router.get("/{node_id}/current-values", response_model=schemas.NodeCurrentValues)
-def get_node_current_values(
-        node_id: int,
-        user: Annotated[models.User, Depends(get_current_user)],
-):
-    """ Get current values of node by id """
-    # TODO fix it
-    db_nodes = [item for item in user.nodes if item.id == node_id]
-    if not db_nodes:
-        raise HTTPException(status_code=404, detail="Node not found")
-
-    db_node = db_nodes[0]
-
-    db_current_values = db_node.current_values
-
-    return dict(data=db_current_values)
-
-
 @router.get("/{node_id}/lamps", response_model=schemas.NodeLamps)
 def get_node_lamps(
         node_id: int,

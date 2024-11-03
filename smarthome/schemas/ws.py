@@ -9,7 +9,7 @@ class WSActions(str, Enum):
     get_data = 'get_data'  # Запрос на получение данных
     connect = 'connect'  # Подключение клиента
     disconnect = 'disconnect'  # Отключение клиента
-    put_data = 'put_data'  # Отправка данных
+    # put_data = 'put_data'  # Отправка данных
     current_values = "updated_values"  # Текущие значения
     send_lamps_state_to_nodes = "send_lamps_state_to_nodes"  # Отпарвка нового состояния ламп на ноды
     set_lamp_state = "set_lamp_state"  # Установка состояния ламп в ноде

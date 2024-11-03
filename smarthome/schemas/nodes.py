@@ -1,21 +1,16 @@
 """
 Node schemas
 """
-from typing import Any
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 from datetime import datetime
 
 
-class NodeBase(BaseModel):
-    """ Base node schema """
+class Node(BaseModel):
+    """ Read node schema """
+    id: int
     is_active: bool
     is_online: bool
     url: str
-
-
-class Node(NodeBase):
-    """ Read node schema """
-    id: int
 
     class ConfigDict:
         """ Config """
@@ -31,55 +26,7 @@ class Nodes(BaseModel):
         from_attributes = True
 
 
-# class NodeStateBase(BaseModel):
-#     """ Base node schema """
-#     is_active: bool
-#     url: str
-#
-#
-# class NodeStateCreate(NodeBase):
-#     """ Read node schema """
-#     id: int
-#
-#     class ConfigDict:
-#         """ Config """
-#         from_attributes = True
-
-
-class NodeStateCreate(BaseModel):
-    data: dict
-    node_id: int
-
-    class ConfigDict:
-        """ Config """
-        from_attributes = True
-
-
-class NodeCurrentValue(BaseModel):
-    """ Read node current value schema """
-    id: int
-    name: str
-    value: Any
-
-    @field_validator("value", mode="before")
-    @classmethod
-    def transform(cls, raw: dict) -> Any:
-        return raw.get("value")
-
-    class ConfigDict:
-        """ Config """
-        from_attributes = True
-
-
-class NodeCurrentValues(BaseModel):
-    """ Read node list schema """
-    data: list[NodeCurrentValue]
-
-    class ConfigDict:
-        """ Config """
-        from_attributes = True
-
-
+# Лампы
 class NodeLamp(BaseModel):
     """ Read node lamp schema """
     id: int
@@ -101,6 +48,7 @@ class NodeLamps(BaseModel):
         from_attributes = True
 
 
+# Сенсоры
 class NodeSensor(BaseModel):
     """ Read node sensor schema """
     id: int
@@ -116,15 +64,6 @@ class NodeSensor(BaseModel):
 class NodeSensors(BaseModel):
     """ Read sensor list schema """
     data: list[NodeSensor]
-
-    class ConfigDict:
-        """ Config """
-        from_attributes = True
-
-
-class NodeCurrentValueCreate(BaseModel):
-    name: str
-    value: Any
 
     class ConfigDict:
         """ Config """

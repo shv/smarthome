@@ -53,18 +53,6 @@ async def websocket_node_endpoint(
         )
         await bus.publish(user.bus_id, ws_message)
 
-    # Вот это почему-то себе отправляет сообщение
-    # ws_message = WSMessage(
-    #     request_id="1",
-    #     action="connect",
-    #     data={"message": f"Node #{node.id} connected"},
-    # )
-    # try:
-    #     await manager.broadcast(ws_message.model_dump(exclude_none=True))
-    # except Exception as ex:
-    #     # Тут тоже нужно гасить тех, кто не онлайн
-    #     logger.exception("Problem with broadcast from node %s: %s", node, ex)
-
     try:
         while True:
             try:
@@ -80,14 +68,14 @@ async def websocket_node_endpoint(
                 continue
 
             if message is not None:
-                logger.info("Get data from websocket: %s", message)
+                logger.debug("Get data from websocket: %s", message)
                 ws_message = WSMessage(**message)
-                logger.info("Get data from websocket: %s", ws_message)
+                logger.debug("Get data from websocket: %s", ws_message)
                 # Переводим ноду в онлайн - она прислала сообщение
                 if not node.is_online:
                     node.is_online = True
                     db.commit()
-                    logger.error("Node %s was online and send message: %s", node, ws_message)
+                    logger.error("Node %s was not online in db but send message: %s", node, ws_message)
                 await action_resolver.process(node, ws_message)
             else:
                 await asyncio.sleep(0.1)
@@ -107,10 +95,4 @@ async def websocket_node_endpoint(
             )
             await bus.publish(user.bus_id, ws_message)
 
-        # ws_message = WSMessage(
-        #     request_id="1",
-        #     action="disconnect",
-        #     data={"message": f"Node {node.id} disconnected"},
-        # )
-        # await manager.broadcast(ws_message.model_dump(exclude_none=True))
-        logger.error(f"Node {node.id} disconnected")
+        logger.warning(f"Node {node.id} disconnected")

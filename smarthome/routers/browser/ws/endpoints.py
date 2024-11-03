@@ -37,22 +37,15 @@ async def websocket_user_endpoint(
     То есть по факту подписывается пользователь, а не нода.
     От ноды получаем сообщение, что-то с ним делаем и, если надо, отправляем пользователям.
     """
-    logger.info("Application stats: %s", websocket.application_state)
+    logger.debug("Application state: %s", websocket.application_state)
     await manager.connect(websocket)
     subscriber = await bus.subscribe(websocket, user.bus_id)
-
-    # ws_message = WSMessage(
-    #     request_id="1",
-    #     action="connect",
-    #     data={"message": f"User #{user.id} connected"},
-    # )
-    # await manager.broadcast(ws_message.model_dump(exclude_none=True))
 
     try:
         while True:
             try:
                 message = await websocket.receive_json()
-                logger.info("Get data from websocket: %s", message)
+                logger.debug("Get data from websocket: %s", message)
             except RuntimeError as ex:
                 logger.exception("Wrong message from user %s: %s", user, ex)
             #     await asyncio.sleep(0.5)
@@ -63,10 +56,10 @@ async def websocket_user_endpoint(
                 continue
 
             if message is not None:
-                logger.info("Get message from websocket: %s", message)
+                logger.debug("Get message from websocket: %s", message)
                 # try:
                 ws_message = WSMessage(**message)
-                logger.info("Get ws_message from websocket: %s", ws_message)
+                logger.debug("Get ws_message from websocket: %s", ws_message)
                 await action_resolver.process(user, ws_message)
                 # except Exception:
                 #     logger.exception("Wrong message: %s", message)
@@ -80,10 +73,4 @@ async def websocket_user_endpoint(
         # TODO перенести возможно в общий метод отписки
         manager.disconnect(websocket)
         await subscriber.unsubscribe()
-        ws_message = WSMessage(
-            request_id="1",
-            action="disconnect",
-            data={"message": f"User {user.id} disconnected"},
-        )
-        await manager.broadcast(ws_message.model_dump(exclude_none=True))
-        logger.error(f"User {user.id} disconnected")
+        logger.warning(f"User {user.id} disconnected")

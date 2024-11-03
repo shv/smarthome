@@ -1,7 +1,4 @@
-import asyncio
 import redis.asyncio as aioredis
-import json
-from fastapi import WebSocket
 from smarthome.logger import logger
 from smarthome.settings import settings
 

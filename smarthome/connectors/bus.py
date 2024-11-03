@@ -5,6 +5,7 @@ from smarthome.connectors.broker import RedisPubSubManager
 from smarthome.schemas.ws import WSMessage
 from starlette.websockets import WebSocketState
 
+
 class BusSubscriber:
     """
     Собирает данные подписчика в одном месте
@@ -62,12 +63,9 @@ class Bus:
                 data = json.loads(redis_message['data'].decode('utf-8'))
                 logger.info("Get data from redis: %s", data)
                 ws_message = WSMessage(**data)
-                # logger.info("Send message to: %s", subscriber.websocket.__dict__)
                 logger.info(">>Application stats: %s", subscriber.websocket.application_state.value)
                 try:
                     await subscriber.websocket.send_json(ws_message.model_dump(exclude_none=True))
-                # except RuntimeError as ex:
-                #     logger.exception("Failed to send message to websocket: %s. Ex: %s", ws_message, ex)
                 except Exception as ex:
                     logger.exception("Failed to send message to websocket: %s. Ex: %s", ws_message, ex)
             else:

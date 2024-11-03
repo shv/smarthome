@@ -13,18 +13,11 @@ services:
       - "0.0.0.0:8888:8000"
     volumes:
       - /Users/sharypoff/code/own/iot/production/production_db:/code/_production_db
-#  db_postgres:
-#    image: postgres:14.3-alpine
-#    hostname: db_postgres
-#    container_name: db_postgres
-#    restart: on-failure
     environment:
       - SMARTHOME_BAK_LOG_LEVEL=INFO
       - SMARTHOME_BAK_PG_DSN=sqlite:////code/_production_db/prod.db
       - SMARTHOME_BAK_REDIS_HOST=redis-prod
       - SMARTHOME_BAK_REDIS_PORT=6379
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=postgres
     networks:
       - prod_net
 
@@ -39,7 +32,7 @@ services:
     depends_on:
       - redis-dev
     ports:
-      - "0.0.0.0:8088:8000"
+      - "8088:8000"
     volumes:
       - ./:/code
 #  db_postgres:
@@ -57,15 +50,30 @@ services:
     networks:
       - dev_net
 
+  tests:
+    profiles:
+      - test
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        POETRY_DEV_INSTALL: "true"
+    command: ["poetry", "run", "pytest"]
+    depends_on:
+      - redis-dev
+    environment:
+      - SMARTHOME_BAK_LOG_LEVEL=DEBUG
+      - SMARTHOME_BAK_PG_DSN=sqlite:////code/_local_db/test.db
+      - SMARTHOME_BAK_REDIS_HOST=redis-dev
+      - SMARTHOME_BAK_REDIS_PORT=6379
+    networks:
+      - dev_net
+
   redis-prod:
     profiles:
       - prod
     image: redis:latest
     restart: always
-    ports:
-      - "6381:6379"
-    expose:
-      - 6381
     environment:
 #      - REDIS_PASSWORD=my-password
       - REDIS_PORT=6379
@@ -74,6 +82,9 @@ services:
       - prod_net
 
   redis-dev:
+    profiles:
+      - dev
+      - test
     image: redis:latest
     restart: always
     ports:
@@ -81,7 +92,6 @@ services:
     expose:
       - 6380
     environment:
-#      - REDIS_PASSWORD=my-password
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
     networks:

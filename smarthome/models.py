@@ -2,7 +2,7 @@
 Models
 """
 import datetime
-from sqlalchemy import Boolean, Column, Float, Integer, String, ForeignKey, JSON, DateTime, UniqueConstraint, PrimaryKeyConstraint
+from sqlalchemy import Boolean, Column, Float, Integer, String, ForeignKey, DateTime, UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 
 from smarthome.connectors.database import Base
@@ -86,9 +86,6 @@ class Node(Base):
     is_online = Column(Boolean, default=False)
     tokens = relationship("NodeToken", back_populates="node")
 
-    states = relationship("NodeState", back_populates="node")
-    current_values = relationship("NodeCurrentValue", back_populates="node")
-
     # TODO с этим нужно разобраться, как связь правильно делается
     # users = relationship('User', secondary=UserNode.__table__, backref='nodes.id')
     users = relationship('User', secondary=UserNode.__table__, backref='nodes_id')
@@ -103,40 +100,6 @@ class Node(Base):
     def bus_id(self):
         # TODO пока так разделяю в редисе ключи пользователя и ноды
         return f"node-{self.id}"
-
-
-class NodeState(Base):
-    """ Node state db model. Это нужно полностью переделать на историю обновлений ноды """
-    __tablename__ = "node_states"
-
-    id = Column(Integer, primary_key=True)
-    created = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
-    data = Column(JSON)
-    node_id = Column(Integer, ForeignKey("nodes.id"))
-    node = relationship("Node", back_populates="states")
-
-    def __repr__(self):
-        return f"<{self.id}: {self.created} [{self.node_id}]. {self.data}>"
-
-
-class NodeCurrentValue(Base):
-    """ Node current values db model """
-    __tablename__ = "node_current_values"
-
-    id = Column(Integer, primary_key=True)
-    created = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
-    updated = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
-    name = Column(String, index=True)
-    value = Column(JSON)
-    node_id = Column(Integer, ForeignKey("nodes.id"), index=True)
-    node = relationship("Node", back_populates="current_values")
-
-    __table_args__ = (
-        UniqueConstraint('node_id', 'name'),
-    )
-
-    def __repr__(self):
-        return f"<{self.id} [{self.node_id}] {self.name}: {self.value}>"
 
 
 class NodeLamp(Base):

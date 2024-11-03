@@ -63,7 +63,7 @@ def get_user_by_email_from_db(db):
 def create_token_in_db(db):
     def _create_token_in_db(user_id: int):
         token = fake.md5()
-        db_token = models.Token(user_id=user_id, token=token)
+        db_token = models.UserToken(user_id=user_id, token=token)
         db.add(db_token)
         db.commit()
         db.refresh(db_token)
