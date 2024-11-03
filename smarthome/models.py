@@ -49,7 +49,7 @@ class UserNode(Base):
     )
 
     def __repr__(self):
-        return f"<{self.node_id} - {self.user_id}>"
+        return f"<UserNode {self.user_id} -> {self.node_id}>"
 
 
 class User(Base):
@@ -68,7 +68,7 @@ class User(Base):
     nodes = relationship('Node', secondary=UserNode.__table__, backref='users_id')
 
     def __repr__(self):
-        return f"<{self.id}: {self.email}>"
+        return f"<User {self.id}: {self.email}>"
 
     @property
     def bus_id(self):
@@ -94,7 +94,7 @@ class Node(Base):
     sensors = relationship("NodeSensor", back_populates="node")
 
     def __repr__(self):
-        return f"<{self.id}>"
+        return f"<Node {self.id}>"
 
     @property
     def bus_id(self):

@@ -57,7 +57,7 @@ async def websocket_node_endpoint(
         while True:
             try:
                 message = await websocket.receive_json()
-                logger.info("Get data from websocket: %s", message)
+                logger.debug("Get data from websocket: %s", message)
             except RuntimeError as ex:
             #     logger.exception("Wrong message from node %s: %s", node, ex)
             #     await asyncio.sleep(0.5)

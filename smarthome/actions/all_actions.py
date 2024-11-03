@@ -35,7 +35,7 @@ class ActionLampChangedFromNode(BaseAction):
         """
         Пока условно формат данных от ноды - json с параметрами в корне
         """
-        logger.info("DATA from ESP32 #%s: %s", self.node.id, data)
+        logger.debug("ActionLampChangedFromNode. DATA from ESP32 #%s: %s", self.node.id, data)
 
         node_lamp_id = data.get("id")
         value = data.get("value")
@@ -43,7 +43,7 @@ class ActionLampChangedFromNode(BaseAction):
             models.NodeLamp.node_lamp_id == node_lamp_id,
             models.NodeLamp.node == self.node,
         ).first()
-        logger.info("Lamp from db: %s", db_lamp)
+        logger.debug("Lamp from db: %s", db_lamp)
         if not db_lamp:
             logger.warning("Lamp %s not found in db", node_lamp_id)
             return
@@ -61,7 +61,7 @@ class ActionLampChangedFromNode(BaseAction):
                 action="updated_lamp",
                 data={"id": db_lamp.id, "value": db_lamp.value, "updated": db_lamp.updated},
             )
-            logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
+            logger.info("Action updated_lamp from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
             await self.bus.publish(user.bus_id, ws_message)
 
 
@@ -75,9 +75,7 @@ class ActionSensorChangedFromNode(BaseAction):
         """
         Пока условно формат данных от ноды - json с параметрами в корне
         """
-        logger.info("DATA from ESP32 #%s: %s", self.node.id, data)
-
-        logger.info("ActionSensorChangedFromNode done")
+        logger.debug("ActionSensorChangedFromNode. DATA from ESP32 #%s: %s", self.node.id, data)
 
         node_sensor_id = data.get("id")
         value = data.get("value")
@@ -85,7 +83,7 @@ class ActionSensorChangedFromNode(BaseAction):
             models.NodeSensor.node_sensor_id == node_sensor_id,
             models.NodeSensor.node == self.node,
         ).first()
-        logger.info("Sensor from db: %s", db_sensor)
+        logger.debug("Sensor from db: %s", db_sensor)
         if not db_sensor:
             logger.warning("Sensor %s not found in db", node_sensor_id)
             return
@@ -103,7 +101,7 @@ class ActionSensorChangedFromNode(BaseAction):
                 action="updated_sensor",
                 data={"id": db_sensor.id, "value": db_sensor.value, "updated": db_sensor.updated},
             )
-            logger.info("ActionPutData from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
+            logger.info("Action updated_sensor from Node %s to user %s Message: %s", self.node.id, user.id, ws_message)
             await self.bus.publish(user.bus_id, ws_message)
 
 
@@ -123,16 +121,16 @@ class ActionSendLampsStateToNodes(BaseAction):
         {"id": 1, "value": 0}
         где id - это внутренний идентификатор лампы внутри ноды
         """
-        logger.info("DATA from User #%s: %s", self.user.id, data)
+        logger.debug("ActionSendLampsStateToNodes. DATA from User #%s: %s", self.user.id, data)
         for lamp in data["lamps"]:
             db_lamp = self.db.query(models.NodeLamp).filter(models.NodeLamp.id == lamp["id"]).first()
-            logger.info("Lamp from db: %s", db_lamp)
+            logger.debug("Lamp from db: %s", db_lamp)
             if not db_lamp:
                 logger.warning("Lamp %s not found in db", lamp["id"])
                 continue
 
             db_node = db_lamp.node
-            logger.info("Node for lamp %s: %s", db_lamp, db_node)
+            logger.debug("Node for lamp %s: %s", db_lamp, db_node)
             if self.user not in db_node.users:
                 logger.error("Lamp %s is not connected to user %s", db_lamp, self.user)
                 continue
@@ -142,7 +140,7 @@ class ActionSendLampsStateToNodes(BaseAction):
                 action="set_lamp_state",
                 data={"id": db_lamp.node_lamp_id, "value": lamp["value"]},
             )
-            logger.info("ActionSendLampsStateToNodes from User %s to Node %s Message: %s",
+            logger.info("Action set_lamp_state from User %s to Node %s Message: %s",
                         self.user.id, db_node.id, ws_message)
             await self.bus.publish(db_node.bus_id, ws_message)
 
@@ -167,9 +165,9 @@ class ActionRestartNode(BaseAction):
 
         Отправляем в ноду action = restart без данных
         """
-        logger.info("DATA from User #%s: %s", self.user.id, data)
+        logger.debug("ActionRestartNode. DATA from User #%s: %s", self.user.id, data)
         db_node = self.db.query(models.Node).filter(models.Node.id == data["id"]).first()
-        logger.info("Node from db: %s", db_node)
+        logger.debug("Node from db: %s", db_node)
         if not db_node:
             logger.warning("Node %s not found in db", data["id"])
             return
@@ -182,7 +180,7 @@ class ActionRestartNode(BaseAction):
             request_id="1",
             action="restart",
         )
-        logger.info("ActionRestartNode from User %s to Node %s Message: %s", self.user.id, db_node.id, ws_message)
+        logger.info("Action restart from User %s to Node %s Message: %s", self.user.id, db_node.id, ws_message)
         await self.bus.publish(db_node.bus_id, ws_message)
 
 
@@ -208,7 +206,7 @@ class ActionResolver:
         }
 
         action_class = action_map[ws_message.action]
-        logger.info("ActionResolver %s Message: %s", action_class, ws_message)
+        logger.info("ActionResolver %s from client %s. Message: %s", action_class, client, ws_message)
 
         try:
             await action_class(client=client, bus=self.bus, db=self.db).process(data=ws_message.data)

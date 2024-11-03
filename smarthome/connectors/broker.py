@@ -25,7 +25,7 @@ class RedisPubSubManager:
         Returns:
             aioredis.Redis: Redis connection object.
         """
-        logger.info("Getting Redis connection")
+        logger.debug("Getting Redis connection")
         return aioredis.Redis(host=self.redis_host,
                               port=self.redis_port,
                               # password="my-password",
@@ -35,10 +35,11 @@ class RedisPubSubManager:
         """
         Connects to the Redis server and initializes the pubsub client.
         """
-        logger.info("Start connecting to Redis server")
+        logger.debug("Start connecting to Redis server")
         self.redis_connection = await self._get_redis_connection()
         self.pubsub = self.redis_connection.pubsub()
-        logger.info("self.redis_connection: %s", self.redis_connection)
+        # TODO сделать 1 коннект, а не каждый раз
+        logger.debug("self.redis_connection: %s", self.redis_connection)
         logger.info("Redis server connected")
 
     async def publish(self, channel: str, message: str) -> None:
@@ -49,7 +50,7 @@ class RedisPubSubManager:
             channel (str): Channel.
             message (str): Message to be published.
         """
-        logger.info("Publishing to Redis channel %s message: %s", channel, message)
+        logger.debug("Publishing to Redis channel %s message: %s", channel, message)
         await self.redis_connection.publish(channel, message)
 
     async def subscribe(self, channel: str) -> aioredis.Redis:
@@ -62,8 +63,12 @@ class RedisPubSubManager:
         Returns:
             aioredis.ChannelSubscribe: PubSub object for the subscribed channel.
         """
-        logger.info("Subscribing to Redis channel: %s start", channel)
-        await self.pubsub.subscribe(channel)
+        logger.debug("Subscribing to Redis channel: %s start", channel)
+        try:
+            await self.pubsub.subscribe(channel)
+        except aioredis.RedisError as e:
+            logger.exception("Failed to subscribe to Redis channel: %s", channel)
+            raise e
         logger.info("Subscribing to Redis channel: %s done", channel)
         return self.pubsub
 
@@ -74,6 +79,6 @@ class RedisPubSubManager:
         Args:
             bus_id (str): Channel or room ID to unsubscribe from.
         """
-        logger.error("Unsubscribing from Redis channel: %s start", bus_id)
+        logger.debug("Unsubscribing from Redis channel: %s start", bus_id)
         await self.pubsub.unsubscribe(bus_id)
         logger.info("Unsubscribing from Redis channel: %s done", bus_id)

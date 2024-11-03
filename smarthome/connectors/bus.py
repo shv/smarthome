@@ -49,7 +49,7 @@ class Bus:
         Args:
             subscriber: subscriber info
         """
-        logger.info("Starting pubsub subscriber")
+        logger.debug("Starting pubsub subscriber")
         while True:
             # Если будет чаще чем нужно отписывать, можно использовать WebSocketState.DISCONNECTED
             if subscriber.websocket.client_state != WebSocketState.CONNECTED:
@@ -58,12 +58,12 @@ class Bus:
 
             redis_message = await subscriber.pubsub_subscriber.get_message(ignore_subscribe_messages=True)
             if redis_message is not None:
-                logger.info("State: %s", subscriber.websocket.application_state.value)
-                logger.info("Get message from redis: %s", redis_message)
+                logger.debug("State: %s", subscriber.websocket.application_state.value)
+                logger.debug("Get message from redis: %s", redis_message)
                 data = json.loads(redis_message['data'].decode('utf-8'))
-                logger.info("Get data from redis: %s", data)
+                logger.debug("Get data from redis: %s", data)
                 ws_message = WSMessage(**data)
-                logger.info(">>Application stats: %s", subscriber.websocket.application_state.value)
+                logger.debug(">>Application stats: %s", subscriber.websocket.application_state.value)
                 try:
                     await subscriber.websocket.send_json(ws_message.model_dump(exclude_none=True))
                 except Exception as ex:

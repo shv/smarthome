@@ -21,7 +21,7 @@ def get_token(
 ):
     """ Generate token for websocket connection """
     # Need auth
-    logger.info("Get token for user: %s", user)
+    logger.debug("Get token for user: %s", user)
     return cruds.get_token_by_user_id(db, user_id=user.id)
 
 
@@ -34,28 +34,28 @@ async def login(
 ):
     # No auth
     if session:
-        logger.info("Find session: %s", session)
+        logger.debug("Find session: %s", session)
         db_token = cruds.get_token_by_token(db, token=session)
 
         if db_token:
-            logger.info("Find token: %s", db_token)
+            logger.debug("Find token: %s", db_token)
             return schemas.Status()
 
-        logger.info("Session deleted")
+        logger.debug("Session deleted")
 
     db_user = cruds.get_user_by_email(db, email=login_data.email)
-    logger.info("Find db_user: %s by email %s", db_user, login_data.email)
+    logger.debug("Find db_user: %s by email %s", db_user, login_data.email)
     if not db_user:
-        logger.info("No found db_user: %s", login_data.email)
+        logger.debug("No found db_user: %s", login_data.email)
         raise HTTPException(status_code=403, detail="Wrong email or password")
 
     db_token = cruds.get_token_by_user_id(db=db, user_id=db_user.id)
-    logger.info("Find token: %s", db_token)
+    logger.debug("Find token: %s", db_token)
 
     if not db_token:
         token = uuid.uuid4().hex
         db_token = cruds.create_token(db=db, user_id=db_user.id, token=token)
-        logger.info("Token %s generated: %s", token, db_token)
+        logger.debug("Token %s generated: %s", token, db_token)
 
     response.set_cookie(
         key="session",
@@ -77,7 +77,7 @@ async def logout(
 ):
     # No auth
     if session:
-        logger.info("Find session: %s", session)
+        logger.debug("Find session: %s", session)
         db_token = cruds.get_token_by_token(db, token=session)
         if db_token:
             db.delete(db_token)

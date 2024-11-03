@@ -18,7 +18,7 @@ async def _get_current_user(
 ) -> models.User:
     """ Get current user from token dependency """
     # TODO сделать универсальным, а не только для вебсокета
-    logger.info("Session: %s, token: %s", session, token)
+    logger.debug("Session: %s, token: %s", session, token)
     if session is None and token is None:
         logger.warning("No user")
         raise AuthError("No user")
@@ -27,7 +27,7 @@ async def _get_current_user(
 
     if token:
         user = await cruds.get_user_by_token(db=db, token=token)
-        logger.info("User: %s", user)
+        logger.debug("User: %s", user)
         if user:
             return user
 
@@ -71,13 +71,13 @@ async def get_current_node_for_ws(
 ) -> models.User:
     """ Get current node from token dependency """
     # TODO сделать универсальным, а не только для вебсокета
-    logger.info("Session: token: %s", token)
+    logger.debug("Session: token: %s", token)
     if token is None:
         logger.warning("No token")
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
 
     node = await cruds.get_node_by_token(db=db, token=token)
-    logger.info("Node: %s", node)
+    logger.debug("Node: %s", node)
     if node:
         return node
 
