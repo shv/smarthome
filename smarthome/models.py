@@ -155,5 +155,10 @@ insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 18', 1,
 insert into node_sensors (name, node_id, value, node_sensor_id) values ('Temperatura (116)', 1, 0, 116);
 insert into node_sensors (name, node_id, value, node_sensor_id) values ('Humidity (216)', 1, 0, 216);
 
+insert into nodes (url, is_active, is_online) values ('http://192.168.0.105/api', true, false);
+insert into node_tokens (token, node_id) values ('test2', 2);
+insert into user_nodes (user_id, node_id) values (1,2);
+insert into node_sensors (name, node_id, value, node_sensor_id) values ('GAS MQ-4 (4)', 2, 0, 27);
+
 insert into users (email, hashed_password) values ('shvmedia@mail.ru', '123');
 """

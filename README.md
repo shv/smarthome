@@ -37,6 +37,14 @@
 
 `docker run -p 8000:8000 --env SMARTHOME_BAK_MAIN_URL=/v1 smarthome`
 
+## Compose
+
+# Run prod
+
+```bash
+docker compose up -d prod
+```
+
 ## Literature
 
 # https://pypi.org/project/fastapi-socketio/
@@ -53,4 +61,3 @@
 # https://github.com/larkin/ESP32-Websocket/blob/master/README.md
 
 # https://docs.espressif.com/projects/esp-idf/en/v4.4.2/esp32/api-reference/protocols/esp_websocket_client.html
-
