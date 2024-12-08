@@ -2,10 +2,14 @@
 Models
 """
 import datetime
-from sqlalchemy import Boolean, Column, Float, Integer, String, ForeignKey, DateTime, UniqueConstraint, PrimaryKeyConstraint
+from sqlalchemy import (
+    Boolean, Column, DateTime, event, Float, ForeignKey, Integer,
+    PrimaryKeyConstraint, String, UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from smarthome.connectors.database import Base
+from smarthome.logger import logger
 
 
 class UserToken(Base):
@@ -136,6 +140,8 @@ class NodeSensor(Base):
     node = relationship("Node", back_populates="sensors")
     node_sensor_id = Column(Integer)
 
+    history = relationship("NodeSensorHistory", back_populates="sensor")
+
     __table_args__ = (
         UniqueConstraint('node_id', 'node_sensor_id'),
     )
@@ -144,16 +150,45 @@ class NodeSensor(Base):
         return f"<{self.id} [{self.node_id}] {self.name}: {self.value}>"
 
 
+class NodeSensorHistory(Base):
+    """ Node sensor history db model """
+    __tablename__ = "node_sensors_history"
+
+    id = Column(Integer, primary_key=True)
+    sensor_id = Column(Integer, ForeignKey("node_sensors.id"), index=True)
+    sensor = relationship("NodeSensor", back_populates="history")
+    changed = Column(DateTime, default=datetime.datetime.now(datetime.timezone.utc))
+    value = Column(Float)
+
+    def __repr__(self):
+        return f"<{self.id} [{self.sensor_id}] {self.created}: {self.value}>"
+
+
+@event.listens_for(NodeSensor, "after_update")
+def add_history(mapper, connection, target):
+    logger.info("Node sensor history event %s.", target)
+    connection.execute(
+        NodeSensorHistory.__table__.insert(),
+        {
+            "sensor_id": target.id,
+            "updated": target.updated,
+            "value": target.value,
+        }
+    )
+
+
 """
 INIT
 insert into users (email, hashed_password) values ('alexey@sharypov.ru', '123');
 insert into nodes (url, is_active, is_online) values ('http://192.168.0.103/api', true, false);
 insert into node_tokens (token, node_id) values ('test', 1);
 insert into user_nodes (user_id, node_id) values (1,1);
+insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 16', 1, 0, 16);
 insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 17', 1, 0, 17);
-insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 18', 1, 0, 18);
 insert into node_sensors (name, node_id, value, node_sensor_id) values ('Temperatura (116)', 1, 0, 116);
 insert into node_sensors (name, node_id, value, node_sensor_id) values ('Humidity (216)', 1, 0, 216);
+insert into node_sensors (name, node_id, value, node_sensor_id) values ('GAS MQ-2 (26)', 2, 0, 26);
+insert into node_sensors (name, node_id, value, node_sensor_id) values ('CO2 (27)', 1, 0, 27);
 
 insert into nodes (url, is_active, is_online) values ('http://192.168.0.105/api', true, false);
 insert into node_tokens (token, node_id) values ('test2', 2);
