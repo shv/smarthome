@@ -11,8 +11,9 @@ fastapi = "^0.111.0"
 uvicorn = "^0.30.1"
 pydantic-settings = "^2.3.3"
 sqlalchemy = "^2.0.30"
-
 redis = "^5.0.6"
+psycopg2-binary = "^2.9.10"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
 mypy = "^1.10.0"
@@ -27,7 +28,6 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.scripts]
-#dev = "smarthome.main:app"
 help = "poetry run uvicorn smarthome.main:app --reload --port 8000"
 
 [tool.pylint]

@@ -1,0 +1,85 @@
+{% extends "wrapper.html" %}
+
+{% block content %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div id='node' style="font-weight: bold"><a href="/nodes/{{ node_id }}">Node {{ node_id }}</a></div>
+    <h2 style="text-align: center" id='sensor'></h2>
+    <div id="myCharts"></div>
+
+    <script>
+        function drawSensorChart(node_id, sensor_data) {
+            const charts_el = document.getElementById('myCharts');
+            var chart_canvas = document.createElement('canvas');
+            charts_el.appendChild(chart_canvas);
+            const ctx = chart_canvas.getContext("2d");
+            $.get("/api/nodes/" + node_id + "/sensors/" + sensor_data["id"] + "/history",
+                function (data, status) {
+                    var labels = [];
+                    var min_values = [];
+                    var max_values = [];
+                    var avg_values = [];
+                    for (const element of data["data"]) {
+                        labels.push(element["period"]);
+                        avg_values.push(element["avg_value"]);
+                        min_values.push(element["min_value"]);
+                        max_values.push(element["max_value"]);
+                    }
+
+                    console.log("Data: " + data + "\nStatus: " + status);
+                    const myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Min',
+                                    data: min_values,
+                                    backgroundColor: 'rgba(99, 99, 255, 0.2)',
+                                    borderColor: 'rgba(99, 99, 255, 1)',
+                                    borderWidth: 1,
+                                },
+                                {
+                                    label: 'Avg',
+                                    data: avg_values,
+                                    backgroundColor: 'rgba(99, 255, 132, 0.2)',
+                                    borderColor: 'rgba(99, 255, 132, 1)',
+                                    borderWidth: 2,
+                                },
+                                {
+                                    label: 'Max',
+                                    data: max_values,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1,
+                                },
+                            ],
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [
+                                    {
+                                        ticks: {
+                                            beginAtZero: true,
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    });
+                }
+            );
+        }
+
+        $.get("/api/nodes/{{ node_id }}/sensors/{{ sensor_id }}",
+            function (data, status) {
+                console.log("Data: " + data + "\nStatus: " + status);
+                var sensors_el = document.getElementById('sensor')
+                var sensor_div_text = document.createTextNode(
+                    "Sensor " + data["id"] + ": " + data["name"]
+                )
+                sensors_el.appendChild(sensor_div_text);
+                drawSensorChart({{ node_id }}, data);
+            }
+        );
+    </script>
+{% endblock %}

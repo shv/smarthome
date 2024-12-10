@@ -4,12 +4,14 @@ Models
 import datetime
 from sqlalchemy import (
     Boolean, Column, DateTime, event, Float, ForeignKey, Integer,
-    PrimaryKeyConstraint, String, UniqueConstraint,
+    orm, PrimaryKeyConstraint, String, UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
-from smarthome.connectors.database import Base
+from smarthome.connectors.database import Base, SessionLocal
 from smarthome.logger import logger
+
+session = orm.scoped_session(SessionLocal)
 
 
 class UserToken(Base):
@@ -161,20 +163,22 @@ class NodeSensorHistory(Base):
     value = Column(Float)
 
     def __repr__(self):
-        return f"<{self.id} [{self.sensor_id}] {self.created}: {self.value}>"
+        return f"<{self.id} [{self.sensor_id}] {self.changed}: {self.value}>"
 
 
 @event.listens_for(NodeSensor, "after_update")
 def add_history(mapper, connection, target):
-    logger.info("Node sensor history event %s.", target)
-    connection.execute(
-        NodeSensorHistory.__table__.insert(),
-        {
-            "sensor_id": target.id,
-            "updated": target.updated,
-            "value": target.value,
-        }
+    """
+    Add history by updating sensor
+    """
+    logger.debug("Node sensor history event %s, %s, %s.", target.id, target.updated, target.value)
+    new_history = NodeSensorHistory(
+        sensor_id=target.id,
+        changed=target.updated,
+        value=target.value,
     )
+    session.add(new_history)
+    session.commit()
 
 
 """
@@ -187,7 +191,7 @@ insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 16', 1,
 insert into node_lamps (name, node_id, value, node_lamp_id) values ('Pin 17', 1, 0, 17);
 insert into node_sensors (name, node_id, value, node_sensor_id) values ('Temperatura (116)', 1, 0, 116);
 insert into node_sensors (name, node_id, value, node_sensor_id) values ('Humidity (216)', 1, 0, 216);
-insert into node_sensors (name, node_id, value, node_sensor_id) values ('GAS MQ-2 (26)', 2, 0, 26);
+insert into node_sensors (name, node_id, value, node_sensor_id) values ('GAS MQ-2 (26)', 1, 0, 26);
 insert into node_sensors (name, node_id, value, node_sensor_id) values ('CO2 (27)', 1, 0, 27);
 
 insert into nodes (url, is_active, is_online) values ('http://192.168.0.105/api', true, false);

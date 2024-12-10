@@ -50,7 +50,7 @@ async def nodes(
 
 
 @router.get("/nodes/{node_id}", response_class=HTMLResponse)
-async def nodes(
+async def node(
         node_id: int,
         request: Request,
         # TODO выделить проверку в отдельный метод для http
@@ -59,3 +59,18 @@ async def nodes(
 ):
     # Need auth
     return templates.TemplateResponse("node.html", {"request": request, "session": session, "node_id": node_id})
+
+
+@router.get("/nodes/{node_id}/sensors/{sensor_id}", response_class=HTMLResponse)
+async def node_sensor(
+        node_id: int,
+        sensor_id: int,
+        request: Request,
+        # TODO выделить проверку в отдельный метод для http
+        # user: Annotated[models.User, Depends(get_current_user)],
+        session: Annotated[Union[str, None], Cookie()] = None,
+):
+    # Need auth
+    return templates.TemplateResponse("node_sensor.html", {
+        "request": request, "session": session, "node_id": node_id, "sensor_id": sensor_id
+    })

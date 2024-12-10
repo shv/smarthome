@@ -22,29 +22,6 @@
                 node_el.appendChild(node_online_el)
             }
         );
-
-        // $.get("/api/nodes/{{ node_id }}/current-values",
-        //     function (data, status) {
-        //         console.log("Data: " + data + "\nStatus: " + status);
-        //         var nodes_el = document.getElementById('values')
-        //         data["data"].forEach(function (currentValue, index, arr) {
-        //             console.log(currentValue)
-        //             var node_el = document.createElement('li')
-        //             var value_label_el = document.createElement('span')
-        //             var value_label_content = document.createTextNode(
-        //                 "ID: " + currentValue["id"] + ", " + currentValue["name"] + ": "
-        //             )
-        //             value_label_el.appendChild(value_label_content)
-        //             var value_value_el = document.createElement('span')
-        //             var value_value_content = document.createTextNode(currentValue["value"])
-        //             value_value_el.appendChild(value_value_content)
-        //             value_value_el.id = "current-value-" + currentValue["id"]
-        //             node_el.appendChild(value_label_el)
-        //             node_el.appendChild(value_value_el)
-        //             nodes_el.appendChild(node_el)
-        //         });
-        //     }
-        // );
         $.get("/api/nodes/{{ node_id }}/lamps",
             function (data, status) {
                 console.log("Data: " + data + "\nStatus: " + status);
@@ -101,9 +78,13 @@
                 data["data"].forEach(function (currentValue, index, arr) {
                     console.log(currentValue)
                     var sensor_div_el = document.createElement('div')
+                    var sensor_a = document.createElement("a");
+                    sensor_a.href = "/nodes/{{ node_id }}/sensors/" + currentValue["id"]
+
                     var sensor_div_text = document.createTextNode(
                         currentValue["id"] + ". " + currentValue["name"] + ": "
                     )
+                    sensor_a.appendChild(sensor_div_text);
 
                     var sensor_value_el = document.createElement('span')
                     sensor_value_el.id = "sensor-value-" + currentValue["id"];
@@ -120,7 +101,7 @@
                     var sensor_updated_text = document.createTextNode(sensor_updated.toLocaleString("ru-RU"))
                     sensor_updated_el.appendChild(sensor_updated_text)
 
-                    sensor_div_el.appendChild(sensor_div_text)
+                    sensor_div_el.appendChild(sensor_a)
                     sensor_div_el.appendChild(sensor_value_el)
                     sensor_div_el.appendChild(sensor_updated_el)
 

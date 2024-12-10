@@ -90,6 +90,7 @@ class ActionSensorChangedFromNode(BaseAction):
 
         db_sensor.value = value
         db_sensor.updated = datetime.datetime.now(datetime.timezone.utc)
+        logger.debug("Sensor %s updated db: %s (%s)", db_sensor.id, db_sensor.value, db_sensor.updated)
         self.db.commit()
 
         users = self.node.users

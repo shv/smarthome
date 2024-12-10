@@ -9,13 +9,12 @@ services:
         POETRY_DEV_INSTALL: "false"
     depends_on:
       - redis-prod
+      - postgres-prod
     ports:
       - "0.0.0.0:8888:8000"
-    volumes:
-      - /Users/sharypoff/code/own/iot/production/production_db:/code/_production_db
     environment:
       - SMARTHOME_BAK_LOG_LEVEL=INFO
-      - SMARTHOME_BAK_PG_DSN=sqlite:////code/_production_db/prod.db
+      - SMARTHOME_BAK_PG_DSN=postgresql://smarthome:jfdksdjf889@postgres-prod:5432/smarthome
       - SMARTHOME_BAK_REDIS_HOST=redis-prod
       - SMARTHOME_BAK_REDIS_PORT=6379
     networks:
@@ -31,22 +30,17 @@ services:
         POETRY_DEV_INSTALL: "true"
     depends_on:
       - redis-dev
+      - postgres-dev
     ports:
       - "8088:8000"
     volumes:
       - ./:/code
-#  db_postgres:
-#    image: postgres:14.3-alpine
-#    hostname: db_postgres
-#    container_name: db_postgres
-#    restart: on-failure
+
     environment:
       - SMARTHOME_BAK_LOG_LEVEL=DEBUG
-      - SMARTHOME_BAK_PG_DSN=sqlite:////code/_local_db/debug.db
+      - SMARTHOME_BAK_PG_DSN=postgresql://smarthome:smarthome123@postgres-dev:5432/smarthome_dev
       - SMARTHOME_BAK_REDIS_HOST=redis-dev
       - SMARTHOME_BAK_REDIS_PORT=6379
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=postgres
     networks:
       - dev_net
 
@@ -97,10 +91,39 @@ services:
     networks:
       - dev_net
 
+  postgres-prod:
+    image: postgres:17
+    profiles:
+      - prod
+    environment:
+      - POSTGRES_DB=smarthome
+      - POSTGRES_USER=smarthome
+      - POSTGRES_PASSWORD=jfdksdjf889
+    ports:
+      - "5436:5432"
+    networks:
+      - prod_net
+    volumes:
+      - /Users/sharypoff/code/own/iot/production/production_db/db:/var/lib/postgresql/data
+
+  postgres-dev:
+    image: postgres:17
+    profiles:
+      - dev
+    environment:
+      - POSTGRES_DB=smarthome_dev
+      - POSTGRES_USER=smarthome
+      - POSTGRES_PASSWORD=smarthome123
+    ports:
+      - "5435:5432"
+    networks:
+      - dev_net
+    volumes:
+      - ./_local_db/db:/var/lib/postgresql/data
+
 networks:
   prod_net:
     driver: bridge
   dev_net:
     driver: bridge
 #    external: true
-

@@ -68,3 +68,24 @@ class NodeSensors(BaseModel):
     class ConfigDict:
         """ Config """
         from_attributes = True
+
+
+class NodeSensorAggregateHistory(BaseModel):
+    """ Read node sensor aggregate history schema """
+    avg_value: float
+    max_value: float
+    min_value: float
+    period: str
+
+    class ConfigDict:
+        """ Config """
+        from_attributes = True
+
+
+class NodeSensorAggregateHistoryList(BaseModel):
+    """ Read sensor aggregate history list schema """
+    data: list[NodeSensorAggregateHistory]
+
+    class ConfigDict:
+        """ Config """
+        from_attributes = True
