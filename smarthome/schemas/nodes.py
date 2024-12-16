@@ -85,6 +85,9 @@ class NodeSensorAggregateHistory(BaseModel):
 class NodeSensorAggregateHistoryList(BaseModel):
     """ Read sensor aggregate history list schema """
     data: list[NodeSensorAggregateHistory]
+    start_date: datetime | None
+    end_date: datetime | None
+    group_by: str | None
 
     class ConfigDict:
         """ Config """

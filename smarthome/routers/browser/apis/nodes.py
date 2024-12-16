@@ -2,8 +2,8 @@
 Browser APIs with Nodes
 """
 import datetime
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated, Literal
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from smarthome import models, schemas
@@ -104,6 +104,18 @@ def get_node_sensor_history(
         sensor_id: int,
         user: Annotated[models.User, Depends(get_current_user)],
         db: Session = Depends(get_db),
+        start_date: datetime.datetime = Query(
+            datetime.datetime.now() - datetime.timedelta(hours=24),
+            description="Дата начала в формате YYYY-MM-DD",
+        ),
+        end_date: datetime.datetime = Query(
+            datetime.datetime.now() + datetime.timedelta(hours=1),
+            description="Дата окончания в формате YYYY-MM-DD",
+        ),
+        group_by: Literal["minute", "hour", "day", "month"] = Query(
+            "hour",
+            description="Вариант группировки (minute, hour, day, month)"
+        ),
 ):
     """ Get history values of node by sensor_id """
     # TODO fix it
@@ -119,14 +131,14 @@ def get_node_sensor_history(
 
     db_sensor = db_sensors[0]
 
-    start_date = datetime.datetime.now() - datetime.timedelta(hours=24)
-    end_date = datetime.datetime.now() + datetime.timedelta(hours=1)
+    # start_date = datetime.datetime.now() - datetime.timedelta(hours=24)
+    # end_date = datetime.datetime.now() + datetime.timedelta(hours=1)
 
-    sensor_history = get_aggregated_sensor_history_data(db, db_sensor.id, start_date, end_date, group_by="minute")
+    sensor_history = get_aggregated_sensor_history_data(db, db_sensor.id, start_date, end_date, group_by=group_by)
     logger.debug("Raw history: %s", sensor_history)
     history_response = [
         {
-            "period": str(item[0]),
+            "period": str(item[0].replace(tzinfo=datetime.timezone.utc)),
             "max_value": round(item[1], 2),
             "min_value": round(item[2], 2),
             "avg_value": round(item[3], 2),
@@ -134,4 +146,9 @@ def get_node_sensor_history(
     ]
     logger.debug("History response: %s", history_response)
 
-    return dict(data=history_response)
+    return dict(
+        data=history_response,
+        start_date=start_date,
+        end_date=end_date,
+        group_by=group_by,
+    )
