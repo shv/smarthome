@@ -104,12 +104,12 @@ def get_node_sensor_history(
         sensor_id: int,
         user: Annotated[models.User, Depends(get_current_user)],
         db: Session = Depends(get_db),
-        start_date: datetime.datetime = Query(
-            datetime.datetime.now() - datetime.timedelta(hours=24),
+        start_date: datetime.datetime | None = Query(
+            None,
             description="Дата начала в формате YYYY-MM-DD",
         ),
-        end_date: datetime.datetime = Query(
-            datetime.datetime.now() + datetime.timedelta(hours=1),
+        end_date: datetime.datetime | None = Query(
+            None,
             description="Дата окончания в формате YYYY-MM-DD",
         ),
         group_by: Literal["minute", "hour", "day", "month"] = Query(
@@ -131,8 +131,10 @@ def get_node_sensor_history(
 
     db_sensor = db_sensors[0]
 
-    # start_date = datetime.datetime.now() - datetime.timedelta(hours=24)
-    # end_date = datetime.datetime.now() + datetime.timedelta(hours=1)
+    if not start_date:
+        start_date = datetime.datetime.now() - datetime.timedelta(hours=24)
+    if not end_date:
+        end_date = datetime.datetime.now() + datetime.timedelta(hours=1)
 
     sensor_history = get_aggregated_sensor_history_data(db, db_sensor.id, start_date, end_date, group_by=group_by)
     logger.debug("Raw history: %s", sensor_history)
