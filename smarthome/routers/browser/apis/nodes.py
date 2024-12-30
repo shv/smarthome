@@ -106,11 +106,11 @@ def get_node_sensor_history(
         db: Session = Depends(get_db),
         start_date: datetime.datetime | None = Query(
             None,
-            description="Дата начала в формате YYYY-MM-DD",
+            description="Дата и время начала в формате YYYY-MM-DDTHH:MM:SS",
         ),
         end_date: datetime.datetime | None = Query(
             None,
-            description="Дата окончания в формате YYYY-MM-DD",
+            description="Дата и время окончания в формате YYYY-MM-DDTHH:MM:SS",
         ),
         group_by: Literal["minute", "hour", "day", "month"] = Query(
             "hour",
