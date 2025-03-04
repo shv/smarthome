@@ -1,5 +1,16 @@
+"""
+Action handling system for the smart home application.
+
+This module defines the action system that processes WebSocket messages from nodes and users.
+It contains base classes and specific implementations for various actions like lamp control,
+sensor data processing, and node management. The action resolver routes incoming messages
+to the appropriate action handlers.
+"""
+
 import datetime
 from abc import ABC, abstractmethod
+from typing import Any
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
@@ -11,29 +22,61 @@ from smarthome.schemas.ws import WSMessage
 
 
 class BaseAction(ABC):
-    """ Если наследовать классы от этого класса, то можно автоматически собирать все экшны """
-    def __init__(self, client: models.Node | models.User, bus: Bus, db: Session):
+    """
+    Base class for all actions.
+    
+    If classes inherit from this class, all actions can be automatically collected.
+    """
+    node: models.Node | None
+    user: models.User | None
+    
+    def __init__(self, client: models.Node | models.User, bus: Bus, db: Session) -> None:
+        """
+        Initialize the action with a client, bus, and database session.
+        
+        Args:
+            client: Either a Node or User model instance
+            bus: Bus instance for message publishing
+            db: Database session
+        """
+        self.node = None
+        self.user = None
+        
         if isinstance(client, models.Node):
             self.node = client
         elif isinstance(client, models.User):
             self.user = client
+        
         self.bus = bus
         self.db = db
 
     @abstractmethod
-    async def process(self, data: dict):
-        """ Нужно переопределить в каждом наследнике """
+    async def process(self, data: dict[str, Any]) -> None:
+        """
+        Process the action with the given data.
+        
+        This method must be overridden in each subclass.
+        
+        Args:
+            data: Dictionary containing action parameters
+        """
 
 
 class ActionLampChangedFromNode(BaseAction):
     """
-    Получение данных лампы от ноды.
-    Класс привязывается к ноде
+    Process lamp data received from a node.
+    
+    This action is bound to a node and handles lamp state changes.
     """
 
-    async def process(self, data: dict):
+    async def process(self, data: dict[str, Any]) -> None:
         """
-        Пока условно формат данных от ноды - json с параметрами в корне
+        Process lamp data from a node.
+        
+        The data format from the node is expected to be a JSON with parameters in the root.
+        
+        Args:
+            data: Dictionary containing lamp data with 'id' and 'value' keys
         """
         logger.debug("ActionLampChangedFromNode. DATA from ESP32 #%s: %s", self.node.id, data)
 
@@ -54,7 +97,7 @@ class ActionLampChangedFromNode(BaseAction):
 
         users = self.node.users
 
-        # Заменить экшн и вообще проработать экшны
+        # Replace the action and generally improve the action system
         for user in users:
             ws_message = WSMessage(
                 request_id="1",
@@ -67,13 +110,19 @@ class ActionLampChangedFromNode(BaseAction):
 
 class ActionSensorChangedFromNode(BaseAction):
     """
-    Получение данных сенсора от ноды.
-    Класс привязывается к ноде
+    Process sensor data received from a node.
+    
+    This action is bound to a node and handles sensor value changes.
     """
 
-    async def process(self, data: dict):
+    async def process(self, data: dict[str, Any]) -> None:
         """
-        Пока условно формат данных от ноды - json с параметрами в корне
+        Process sensor data from a node.
+        
+        The data format from the node is expected to be a JSON with parameters in the root.
+        
+        Args:
+            data: Dictionary containing sensor data with 'id' and 'value' keys
         """
         logger.debug("ActionSensorChangedFromNode. DATA from ESP32 #%s: %s", self.node.id, data)
 
@@ -95,7 +144,7 @@ class ActionSensorChangedFromNode(BaseAction):
 
         users = self.node.users
 
-        # Заменить экшн и вообще проработать экшны
+        # Replace the action and generally improve the action system
         for user in users:
             ws_message = WSMessage(
                 request_id="1",
@@ -108,19 +157,25 @@ class ActionSensorChangedFromNode(BaseAction):
 
 class ActionSendLampsStateToNodes(BaseAction):
     """
-    Управление лампой юзером на нодах.
-    Класс привязывается к пользователю
+    Control lamps on nodes by a user.
+    
+    This action is bound to a user and sends lamp state changes to nodes.
     """
 
-    async def process(self, data: dict):
+    async def process(self, data: dict[str, Any]) -> None:
         """
-        Получаем лампу и значение
+        Process lamp state changes from a user and send them to nodes.
+        
+        Input data format:
         {"lamps": [{"id": 1, "value": 0}]}
-        где id - это идентификатор лампы в базе
-
-        Отправляем в ноду по каждой лампе:
+        where 'id' is the lamp identifier in the database.
+        
+        Output to node for each lamp:
         {"id": 1, "value": 0}
-        где id - это внутренний идентификатор лампы внутри ноды
+        where 'id' is the internal lamp identifier within the node.
+        
+        Args:
+            data: Dictionary containing lamp state changes
         """
         logger.debug("ActionSendLampsStateToNodes. DATA from User #%s: %s", self.user.id, data)
         for lamp in data["lamps"]:
@@ -145,26 +200,32 @@ class ActionSendLampsStateToNodes(BaseAction):
                         self.user.id, db_node.id, ws_message)
             await self.bus.publish(db_node.bus_id, ws_message)
 
-        # Получить из базы каждую лампу
-        # Сверить, нода лампу принадлежит юзеру
-        # Если не принадлежит, то просто пропустить
-        # Отправить на ноду сообщение
-        # Нода должна будет ответить,а вот ответ уже записываем в базу и отправляем юзерам
+        # Get each lamp from the database
+        # Verify that the lamp's node belongs to the user
+        # If it doesn't belong, just skip it
+        # Send a message to the node
+        # The node should respond, and we record that response in the database and send it to users
 
 
 class ActionRestartNode(BaseAction):
     """
-    Перезагрузка ноды
-    Класс привязывается к пользователю
+    Restart a node.
+    
+    This action is bound to a user and sends restart commands to nodes.
     """
 
-    async def process(self, data: dict):
+    async def process(self, data: dict[str, Any]) -> None:
         """
-        Получаем лампу и значение
+        Process node restart request from a user.
+        
+        Input data format:
         {"id": 1}
-        где id - это идентификатор ноды в базе
-
-        Отправляем в ноду action = restart без данных
+        where 'id' is the node identifier in the database.
+        
+        Sends to the node an action = "restart" without additional data.
+        
+        Args:
+            data: Dictionary containing the node ID to restart
         """
         logger.debug("ActionRestartNode. DATA from User #%s: %s", self.user.id, data)
         db_node = self.db.query(models.Node).filter(models.Node.id == data["id"]).first()
@@ -186,19 +247,31 @@ class ActionRestartNode(BaseAction):
 
 
 class ActionResolver:
-    """ Singleton через Depends """
-    def __init__(self, db: Session, bus: Bus):
+    """
+    Action resolver that processes WebSocket messages and routes them to appropriate actions.
+    
+    This class is implemented as a singleton through FastAPI's Depends.
+    """
+    def __init__(self, db: Session, bus: Bus) -> None:
+        """
+        Initialize the action resolver.
+        
+        Args:
+            db: Database session
+            bus: Bus instance for message publishing
+        """
         self.db = db
         self.bus = bus
 
     async def process(self, client: models.Node | models.User, ws_message: WSMessage) -> None:
         """
-        Обработка экшнов от вебсокетов нод и пользователей
-        :param client: пользователь или нода - инициатор экшна
-        :param ws_message:
-        :return:
+        Process actions from WebSockets of nodes and users.
+        
+        Args:
+            client: User or node that initiated the action
+            ws_message: WebSocket message containing the action and data
         """
-        # Маппер экшнов. По экшну из сообщения выбирает класс экшна
+        # Action mapper. Selects the action class based on the action from the message
         action_map = {
             "lamp_changed": ActionLampChangedFromNode,
             "sensor_changed": ActionSensorChangedFromNode,
@@ -216,6 +289,17 @@ class ActionResolver:
 
 
 async def get_action_resolver(db: Session = Depends(get_db), bus: Bus = Depends(get_bus)) -> ActionResolver:
-    """ Только через Depends """
+    """
+    Get an instance of ActionResolver.
+    
+    This function is designed to be used with FastAPI's dependency injection system.
+    
+    Args:
+        db: Database session obtained through dependency injection
+        bus: Bus instance obtained through dependency injection
+        
+    Returns:
+        An instance of ActionResolver
+    """
     action_resolver = ActionResolver(db=db, bus=bus)
     return action_resolver

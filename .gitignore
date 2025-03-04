@@ -31,3 +31,10 @@ archive.zip
 .DS_Store
 
 _local_db
+
+# pixi environments
+.pixi
+*.egg-info
+# magic environments
+.magic
+.aider*
