@@ -1,8 +1,9 @@
 """
-Browser endpoints with html for front pages
+Browser authentication endpoints for handling user sessions and tokens.
 """
-from typing import Annotated, Union
+from typing import Annotated
 import uuid
+
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
@@ -18,9 +19,17 @@ router = APIRouter()
 def get_token(
         user: Annotated[models.User, Depends(get_current_user)],
         db: Session = Depends(get_db)
-):
-    """ Generate token for websocket connection """
-    # Need auth
+) -> schemas.Token:
+    """
+    Generate token for websocket connection.
+    
+    Args:
+        user: Authenticated user from dependency
+        db: Database session
+    
+    Returns:
+        Token object for the authenticated user
+    """
     logger.debug("Get token for user: %s", user)
     return cruds.get_token_by_user_id(db, user_id=user.id)
 
@@ -29,10 +38,24 @@ def get_token(
 async def login(
         login_data: schemas.UserCreate,
         response: Response,
-        session: Annotated[Union[str, None], Cookie()] = None,
+        session: Annotated[str | None, Cookie()] = None,
         db: Session = Depends(get_db)
-):
-    # No auth
+) -> schemas.Status:
+    """
+    Authenticate user and set session cookie.
+    
+    Args:
+        login_data: User credentials
+        response: FastAPI response object for setting cookies
+        session: Current session cookie if exists
+        db: Database session
+    
+    Returns:
+        Status object indicating success
+    
+    Raises:
+        HTTPException: If authentication fails
+    """
     if session:
         logger.debug("Find session: %s", session)
         db_token = cruds.get_token_by_token(db, token=session)
@@ -60,10 +83,10 @@ async def login(
     response.set_cookie(
         key="session",
         value=db_token.token,
-        max_age=60 * 60 * 24 * 365,  # Кука будет действовать 7 дней
-        httponly=True,  # Доступно только через HTTP (невозможно получить через JavaScript)
-        # secure=True,  # Работает только через HTTPS (если ваш сайт использует HTTPS)
-        # samesite="lax"  # Политика SameSite для защиты от CSRF-атак
+        max_age=60 * 60 * 24 * 365,  # Cookie will be valid for 365 days
+        httponly=True,  # Only accessible via HTTP (not via JavaScript)
+        # secure=True,  # Only works via HTTPS (if your site uses HTTPS)
+        # samesite="lax"  # SameSite policy for CSRF protection
     )
 
     return schemas.Status()
@@ -72,15 +95,27 @@ async def login(
 @router.get("/logout", response_model=schemas.Status)
 async def logout(
         response: Response,
-        session: Annotated[Union[str, None], Cookie()] = None,
+        session: Annotated[str | None, Cookie()] = None,
         db: Session = Depends(get_db)
-):
-    # No auth
+) -> schemas.Status:
+    """
+    Log out user by deleting session token and cookie.
+    
+    Args:
+        response: FastAPI response object for deleting cookies
+        session: Current session cookie if exists
+        db: Database session
+    
+    Returns:
+        Status object indicating success
+    """
     if session:
         logger.debug("Find session: %s", session)
         db_token = cruds.get_token_by_token(db, token=session)
         if db_token:
             db.delete(db_token)
+            db.commit()
 
         response.delete_cookie("session")
-        return schemas.Status()
+
+    return schemas.Status()
