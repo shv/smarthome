@@ -4,7 +4,7 @@
 <h1>Node list</h1>
 <ul id='nodes'></ul>
 <script>
-    $.get("/api/nodes",
+    $.get("/api/nodes/",
         function (data, status) {
             console.log("Data: " + data + "\nStatus: " + status);
             var nodes_el = document.getElementById('nodes')
