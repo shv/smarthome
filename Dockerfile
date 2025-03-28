@@ -22,4 +22,4 @@ RUN poetry config virtualenvs.create false && \
 
 COPY . /code
 
-CMD ["poetry", "run", "uvicorn", "smarthome.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "smarthome.main:app", "--host", "0.0.0.0", "--port", "8001"]

@@ -11,7 +11,7 @@ services:
       - redis-prod
       - postgres-prod
     ports:
-      - "0.0.0.0:8888:8000"
+      - "0.0.0.0:8888:8001"
     environment:
       - SMARTHOME_BAK_LOG_LEVEL=INFO
       - SMARTHOME_BAK_PG_DSN=postgresql://smarthome:jfdksdjf889@postgres-prod:5432/smarthome
@@ -32,7 +32,7 @@ services:
       - redis-dev
       - postgres-dev
     ports:
-      - "8088:8000"
+      - "8088:8001"
     volumes:
       - ./:/code
 

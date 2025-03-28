@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Smart Home backend"
 authors = ["Alexey Sharypov <alexey@sharypov.ru>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.13"
