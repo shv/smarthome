@@ -13,13 +13,9 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Build the Docker image
-      run: docker build -t ${{ vars.DOCKER_PROJECT }}:${GITHUB_REF_NAME} -f Dockerfile .
+#      run: docker build -t ${{ vars.DOCKER_PROJECT }}:${GITHUB_REF_NAME} -f Dockerfile .
+      run: docker build -t ${{ vars.DOCKER_PROJECT }}:latest -f Dockerfile .
 
     - name: Push image to docker
-      run: docker push ${{ vars.DOCKER_PROJECT }}:${GITHUB_REF_NAME}
-
-    - name: Create tag latest
-      run: docker tag ${{ vars.DOCKER_PROJECT }}:${GITHUB_REF_NAME} ${{ vars.DOCKER_PROJECT }}:latest
-
-    - name: Push tag latest to docker
+#      run: docker push ${{ vars.DOCKER_PROJECT }}:${GITHUB_REF_NAME}
       run: docker push ${{ vars.DOCKER_PROJECT }}:latest
